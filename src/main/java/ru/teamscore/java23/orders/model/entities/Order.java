@@ -32,7 +32,7 @@ public class Order {
 
     private final List<OrderItem> items;
 
-    Order(int id) {
+    public Order(int id) {
         this.id = id;
         created = LocalDateTime.now();
         items = new ArrayList<>();
@@ -57,6 +57,12 @@ public class Order {
                 .map(i -> i.getAmount())
                 .reduce(BigDecimal.ZERO, (sum, amount) -> sum.add(amount))
                 .setScale(2, RoundingMode.HALF_UP);
+    }
+
+    public int getTotalQuantity() {
+        return items.stream()
+                .map(oi -> oi.getQuantity())
+                .reduce(0, (sum, q) -> sum + q);
     }
 
     public Collection<OrderItem> getItemsAll() {
