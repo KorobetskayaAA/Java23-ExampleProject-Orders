@@ -18,7 +18,7 @@ import java.util.Optional;
 @AllArgsConstructor(staticName = "load")
 public class Order {
     @Getter
-    private final int id;
+    private final long id;
 
     @Getter
     private final LocalDateTime created;
