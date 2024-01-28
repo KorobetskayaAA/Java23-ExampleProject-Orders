@@ -31,7 +31,7 @@ public class OrdersManager {
         return orders.stream().toArray(Order[]::new);
     }
 
-    public Optional<Order> getOrder(int id) {
+    public Optional<Order> getOrder(long id) {
         return orders.stream()
                 .filter(o -> o.getId() == id)
                 .findFirst();

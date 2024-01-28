@@ -1,9 +1,6 @@
 package ru.teamscore.java23.orders.model.entities;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NonNull;
-import lombok.Setter;
+import lombok.*;
 import ru.teamscore.java23.orders.model.enums.OrderStatus;
 import ru.teamscore.java23.orders.model.exceptions.OrderSetStatusException;
 
@@ -15,6 +12,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
+@EqualsAndHashCode
 @AllArgsConstructor(staticName = "load")
 public class Order {
     @Getter
