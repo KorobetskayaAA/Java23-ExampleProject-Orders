@@ -1,0 +1,57 @@
+{
+  "orders": [
+    {
+      "id": 1,
+      "status": "CANCEL",
+      "items": [
+        {
+          "barcode": "1234512345001",
+          "price": 10.0,
+          "quantity": 1
+        },
+        {
+          "barcode": "1234512345002",
+          "price": 2.0,
+          "quantity": 100
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "status": "PROCESSING",
+      "items": [
+        {
+          "barcode": "1234512345003",
+          "price": 9.99,
+          "quantity": 10
+        },
+        {
+          "barcode": "1234512345004",
+          "price": 0.01,
+          "quantity": 1
+        },
+        {
+          "barcode": "1234512345005",
+          "price": 20.5,
+          "quantity": 2
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "status": "CLOSED",
+      "items": [
+        {
+          "barcode": "1234512345006",
+          "price": 12345.67,
+          "quantity": 3
+        }
+      ]
+    }
+  ],
+  "totalAmount": 37387.92,
+  "totalQuantity": 117,
+  "totalItemsCount": 6,
+  "cancelAmount": 210.0,
+  "cancelCount": 1
+}
