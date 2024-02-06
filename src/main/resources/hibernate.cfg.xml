@@ -1,0 +1,17 @@
+<hibernate-configuration>
+    <session-factory>
+        <!-- SQL dialect
+           PostgreSQLDialect does not need to be specified explicitly using 'hibernate.dialect'
+        <property name="hibernate.dialect">org.hibernate.dialect.PostgreSQLDialect</property>
+        -->
+        <!-- Connection settings -->
+        <property name="hibernate.connection.driver_class">org.postgresql.Driver</property>
+        <property name="hibernate.connection.url">jdbc:postgresql://localhost/orders</property>
+        <property name="hibernate.connection.username">orders_user</property>
+        <property name="hibernate.connection.password">orders</property>
+        <!-- Print executed SQL to stdout -->
+        <property name="show_sql">true</property>
+        <!-- Create/update database structure on start -->
+        <property name="hibernate.hbm2ddl.auto">validate</property>
+    </session-factory>
+</hibernate-configuration>
