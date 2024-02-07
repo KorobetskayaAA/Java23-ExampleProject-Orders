@@ -8,6 +8,7 @@ import lombok.NonNull;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -24,10 +25,10 @@ public class OrderWithItems {
 
     @Getter
     @Embedded
-    private CustomerOrder order;
+    private CustomerOrder order = new CustomerOrder();
 
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
-    private List<OrderItem> items;
+    @OneToMany(mappedBy = "pk.order", cascade = CascadeType.ALL)
+    private List<OrderItem> items = new ArrayList<>();
 
     public BigDecimal getTotalAmount() {
         return items.stream()
@@ -51,18 +52,24 @@ public class OrderWithItems {
     }
 
     public Optional<OrderItem> getItem(@NonNull Barcode barcode) {
-        return getItem(barcode.toString());
-    }
-
-    public Optional<OrderItem> getItem(@NonNull String barcode) {
         return items.stream()
                 .filter(oi -> oi.getItem().getBarcode().equals(barcode))
                 .findFirst();
     }
 
+    public Optional<OrderItem> getItem(@NonNull String barcode) {
+        return getItem(new Barcode(barcode));
+    }
+
     public Optional<OrderItem> getItem(@NonNull Item item) {
         return items.stream()
                 .filter(oi -> oi.getItem().equals(item))
+                .findFirst();
+    }
+
+    public Optional<OrderItem> getItem(@NonNull long itemId) {
+        return items.stream()
+                .filter(oi -> oi.getItem().getId() == itemId)
                 .findFirst();
     }
 
@@ -74,7 +81,7 @@ public class OrderWithItems {
             return existingItem.get();
         }
         // новый Item
-        OrderItem oi = new OrderItem(item, quantity);
+        OrderItem oi = new OrderItem(item, this, quantity);
         items.add(oi);
         return oi;
     }

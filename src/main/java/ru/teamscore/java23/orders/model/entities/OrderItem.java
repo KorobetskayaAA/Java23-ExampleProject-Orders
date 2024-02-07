@@ -14,27 +14,32 @@ import java.math.RoundingMode;
 @Table(name = "order_item", schema = "orders")
 public class OrderItem {
     @Embeddable
-    private class OrderItemPK {
-        @Column(name = "order_id", nullable = false)
-        private long orderId;
-        @Column(name = "item_id", nullable = false)
-        private long itemId;
+    static class OrderItemPK {
+        @Getter
+        @Setter
+        @ManyToOne
+        @JoinColumn(name = "item_id")
+        private Item item;
+
+        @Getter
+        @Setter
+        @ManyToOne
+        @JoinColumn(name = "order_id")
+        private OrderWithItems order;
     }
 
     @EmbeddedId
     private OrderItemPK pk = new OrderItemPK();
 
-    @Getter
-    @Setter
-    @ManyToOne
-    @JoinColumn(name = "item_id", insertable = false, updatable = false)
-    private Item item;
+    @Transient
+    public Item getItem() {
+        return pk.getItem();
+    }
 
-    @Getter
-    @Setter
-    @ManyToOne
-    @JoinColumn(name = "order_id", insertable = false, updatable = false)
-    private OrderWithItems order;
+    @Transient
+    public OrderWithItems getOrder() {
+        return pk.getOrder();
+    }
 
     @Getter
     @Setter
@@ -56,9 +61,9 @@ public class OrderItem {
         return this.quantity;
     }
 
-    public OrderItem(@NonNull Item item, int quantity) {
-        pk.itemId = item.getId();
-        this.item = item;
+    public OrderItem(@NonNull Item item, @NonNull OrderWithItems order, int quantity) {
+        pk.item = item;
+        pk.order = order;
         this.price = item.getPrice();
         this.quantity = quantity;
     }

@@ -15,8 +15,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.function.BiPredicate;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 class CatalogTest {
 
@@ -111,7 +110,25 @@ class CatalogTest {
         assertEquals(startCount + 2, catalog.getItemsCount(), "Item added");
     }
 
-
+    @Test
+    void updateItem() {
+        long itemId = 1;
+        BigDecimal priceToAdd = BigDecimal.valueOf(10);
+        Catalog catalog = new Catalog(entityManager);
+        // get some item from DB
+        var existingItem = catalog.getItem(itemId);
+        assertTrue(existingItem.isPresent(), "Item with id = " + itemId + " should exist");
+        Item item = existingItem.get();
+        // change item and save to DB
+        item.setPrice(item.getPrice().add(priceToAdd));
+        catalog.updateItem(item);
+        // reload item from DB again and assure it changed
+        var itemAfterUpdate = catalog.getItem(itemId);
+        assertTrue(itemAfterUpdate.isPresent(), "Item with id = " + itemId + " disappeared after update");
+        assertEquals(item.getPrice(), itemAfterUpdate.get().getPrice());
+        // just getting sure that we reloaded item and it is no the same one object
+        assertNotSame(item, itemAfterUpdate);
+    }
 
     @Test
     void find() {

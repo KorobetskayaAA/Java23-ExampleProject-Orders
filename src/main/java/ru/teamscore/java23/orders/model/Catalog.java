@@ -54,6 +54,12 @@ public class Catalog {
         entityManager.getTransaction().commit();
     }
 
+    public void updateItem(@NonNull Item item) {
+        entityManager.getTransaction().begin();
+        entityManager.merge(item);
+        entityManager.getTransaction().commit();
+    }
+
     public Collection<Item> find(String search) {
         String pattern = "%" + search + "%";
         return entityManager

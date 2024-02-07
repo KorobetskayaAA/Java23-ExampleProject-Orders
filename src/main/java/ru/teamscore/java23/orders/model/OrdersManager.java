@@ -2,6 +2,7 @@ package ru.teamscore.java23.orders.model;
 
 import jakarta.persistence.EntityManager;
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import ru.teamscore.java23.orders.model.entities.Item;
 import ru.teamscore.java23.orders.model.entities.OrderItem;
@@ -41,19 +42,28 @@ public class OrdersManager {
     }
 
     public void addOrder(OrderWithItems order) {
-        if (getOrder(order.getId()).isEmpty()) {
-            var transaction = entityManager.getTransaction();
-            transaction.begin();
+        var transaction = entityManager.getTransaction();
+        transaction.begin();
+        try {
             entityManager.persist(order);
             transaction.commit();
+        } catch (Exception e) {
+            transaction.rollback();
+            throw e;
         }
+    }
+
+    public void updateOrder(@NonNull OrderWithItems order) {
+        entityManager.getTransaction().begin();
+        entityManager.merge(order);
+        entityManager.getTransaction().commit();
     }
 
     public class OrderInfoManager {
         public BigDecimal getProcessingTotalAmount() {
             var result = entityManager
                     .createQuery("select sum(oi.price * oi.quantity) from OrderItem oi " +
-                                    "where oi.order.order.status = :status",
+                                    "where oi.pk.order.order.status = :status",
                             BigDecimal.class)
                     .setParameter("status", OrderStatus.PROCESSING)
                     .getSingleResult();
@@ -62,8 +72,8 @@ public class OrdersManager {
 
         public Item[] getProcessingOrderItems() {
             return entityManager
-                    .createQuery("select distinct oi.item from OrderItem as oi " +
-                                    "where oi.order.order.status = :status",
+                    .createQuery("select distinct oi.pk.item from OrderItem as oi " +
+                                    "where oi.pk.order.order.status = :status",
                             OrderItem.class)
                     .setParameter("status", OrderStatus.PROCESSING)
                     .getResultList()

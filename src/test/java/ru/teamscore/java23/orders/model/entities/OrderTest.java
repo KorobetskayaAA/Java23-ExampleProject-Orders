@@ -40,9 +40,9 @@ class OrderTest {
             )
     };
     OrderItem[] testOrderItems = new OrderItem[]{
-            new OrderItem(testItems[0], 1),
-            new OrderItem(testItems[1], 100),
-            new OrderItem(testItems[2], 9)
+            new OrderItem(testItems[0], new OrderWithItems(), 1),
+            new OrderItem(testItems[1], new OrderWithItems(), 100),
+            new OrderItem(testItems[2], new OrderWithItems(), 9)
     };
 
     {

@@ -80,4 +80,58 @@ class OrdersManagerTest {
         assertTrue(order.isPresent());
         assertEquals(id, order.get().getId());
     }
+
+    @Test
+    void addOrder() {
+        // prepare item to insert into order
+        long itemId = 2;
+        Catalog catalog = new Catalog(entityManager);
+        var itemToAddOptional = catalog.getItem(itemId);
+        assertTrue(itemToAddOptional.isPresent(), "Item to insert not found");
+        var itemToAdd = itemToAddOptional.get();
+        // create order
+        OrderWithItems orderToAdd = new OrderWithItems();
+        orderToAdd.getOrder().setCustomerName("TEST TEST");
+        orderToAdd.addItem(itemToAdd, 1);
+        // save order
+        long count = ordersManager.getOrdersCount();
+        ordersManager.addOrder(orderToAdd);
+        assertEquals(count + 1, orderToAdd.getId());
+        // assert
+        var addedOrder = ordersManager.getOrder(orderToAdd.getId());
+        assertTrue(addedOrder.isPresent());
+        assertEquals(orderToAdd.getOrder().getCustomerName(), addedOrder.get().getOrder().getCustomerName());
+        assertEquals(orderToAdd.getOrder().getStatus(), addedOrder.get().getOrder().getStatus());
+        var addedItem = addedOrder.get().getItem(itemToAdd.getBarcode());
+        assertTrue(addedItem.isPresent());
+        assertEquals(itemToAdd.getPrice(), addedItem.get().getPrice());
+        assertEquals(1, addedItem.get().getQuantity());
+    }
+
+    @Test
+    void updateOrder() {
+        long orderId = 1;
+        long itemId = 23;
+        int newQuantity = 10000;
+        String newCustomerName = "TEST TEST";
+        // get order
+        var existingOrder = ordersManager.getOrder(orderId);
+        assertTrue(existingOrder.isPresent(), "Order with id = " + orderId + " should exist");
+        OrderWithItems order = existingOrder.get();
+        // change item in order
+        var orderItemToEdit = order.getItem(itemId);
+        assertTrue(orderItemToEdit.isPresent(), "Item with id = " + itemId + " should exist in order");
+        orderItemToEdit.get().setQuantity(newQuantity);
+        // change order
+        order.getOrder().setCustomerName(newCustomerName);
+        // save changes
+        ordersManager.updateOrder(order);
+        // reload from DB and assert changes
+        var orderAfterUpdate = ordersManager.getOrder(orderId);
+        assertTrue(orderAfterUpdate.isPresent(), "Order with id = " + orderId + " disappeared after update");
+        var orderItemAfterUpdate = order.getItem(itemId);
+        assertTrue(orderItemAfterUpdate.isPresent(), "Item with id = " + itemId + " disappeared after update");
+        assertEquals(newCustomerName, orderAfterUpdate.get().getOrder().getCustomerName());
+        assertEquals(newQuantity, orderItemAfterUpdate.get().getQuantity());
+    }
 }
