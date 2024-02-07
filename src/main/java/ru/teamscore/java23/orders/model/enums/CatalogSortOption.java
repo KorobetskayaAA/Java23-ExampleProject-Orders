@@ -1,18 +1,15 @@
 package ru.teamscore.java23.orders.model.enums;
 
 import lombok.Getter;
-import ru.teamscore.java23.orders.model.entities.Item;
-
-import java.util.Comparator;
 
 public enum CatalogSortOption {
-    TITLE(Comparator.comparing(Item::getTitle)),
-    PRICE(Comparator.comparing(Item::getPrice));
+    TITLE("title"),
+    PRICE("price");
 
     @Getter
-    Comparator<Item> comparator;
+    String columnName;
 
-    CatalogSortOption(Comparator<Item> comparator) {
-        this.comparator = comparator;
+    CatalogSortOption(String columnName) {
+        this.columnName = columnName;
     }
 }

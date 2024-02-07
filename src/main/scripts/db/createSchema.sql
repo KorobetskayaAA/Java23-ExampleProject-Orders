@@ -1,6 +1,7 @@
 create schema if not exists "catalog";
 create schema if not exists "orders";
 
+drop view if exists "orders"."order_statistics";
 drop table if exists "orders"."order_item";
 drop table if exists "catalog"."item";
 drop table if exists "orders"."order";

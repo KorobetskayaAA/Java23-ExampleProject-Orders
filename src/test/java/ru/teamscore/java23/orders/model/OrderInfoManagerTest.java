@@ -1,121 +1,97 @@
 package ru.teamscore.java23.orders.model;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import ru.teamscore.java23.orders.model.entities.Barcode;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+import org.hibernate.cfg.Configuration;
+import org.junit.jupiter.api.*;
 import ru.teamscore.java23.orders.model.entities.Item;
-import ru.teamscore.java23.orders.model.entities.Order;
-import ru.teamscore.java23.orders.model.enums.ItemStatus;
-import ru.teamscore.java23.orders.model.enums.OrderStatus;
+import ru.teamscore.java23.orders.model.entities.OrderItem;
+import ru.teamscore.java23.orders.model.entities.OrderWithItems;
 import ru.teamscore.java23.orders.model.statistics.OrdersStatistics;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.util.Arrays;
+import java.util.HashSet;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class OrderInfoManagerTest {
-    Random rnd = new Random(1000);
-    int year = 2023;
-    int fromMonth = 10;
-    int toMonth = 12;
-    BigDecimal expectedProcessingTotalAmount = BigDecimal.ZERO;
-    int expectedProcessingTotalItems = 0;
-    List<Order> orders = getOrders();
+    private static EntityManagerFactory entityManagerFactory;
+    private EntityManager entityManager;
+    private OrdersManager ordersManager;
 
-    // Тестовый OrdersManager
-    OrdersManager ordersManager;
+    @BeforeAll
+    public static void setup() throws IOException {
+        entityManagerFactory = new Configuration()
+                .configure("hibernate-postgres.cfg.xml")
+                .addAnnotatedClass(Item.class)
+                .addAnnotatedClass(OrderWithItems.class)
+                .addAnnotatedClass(OrderItem.class)
+                .addAnnotatedClass(OrdersStatistics.class)
+                .buildSessionFactory();
+        SqlScripts.runFromFile(entityManagerFactory, "createSchema.sql");
+        SqlScripts.runFromFile(entityManagerFactory, "viewOrderStatistics.sql");
+    }
 
-    // Для каждого теста - свой экземпляр
-    @BeforeEach
-    void setUp() {
-        ordersManager = new OrdersManager();
-        for (Order o : orders) {
-            ordersManager.addOrder(o);
+    @AfterAll
+    public static void tearDown() {
+        if (entityManagerFactory != null) {
+            entityManagerFactory.close();
         }
+    }
+    @BeforeEach
+    public void openSession() throws IOException {
+        SqlScripts.runFromFile(entityManagerFactory, "insertTestItems.sql");
+        SqlScripts.runFromFile(entityManagerFactory, "insertTestOrders.sql");
+        entityManager = entityManagerFactory.createEntityManager();
+        ordersManager = new OrdersManager(entityManager);
+    }
+
+    @AfterEach
+    public void closeSession() throws IOException {
+        if (entityManager != null) {
+            entityManager.close();
+        }
+        SqlScripts.runFromFile(entityManagerFactory, "clearTestOrders.sql");
+        SqlScripts.runFromFile(entityManagerFactory, "clearTestItems.sql");
     }
 
     @Test
     void getProcessingTotalAmount() {
-        assertEquals(expectedProcessingTotalAmount,
+        assertEquals(new BigDecimal("2701059.14"),
                 ordersManager.getInfo().getProcessingTotalAmount());
     }
 
     @Test
     void getProcessingOrderItems() {
         var items = ordersManager.getInfo().getProcessingOrderItems();
-        assertEquals(expectedProcessingTotalItems, items.length);
+        // all items are unique
+        var uniqueItems = new HashSet<Item>(items.length);
+        uniqueItems.addAll(Arrays.asList(items));
+        assertEquals(uniqueItems.size(), items.length);
     }
 
     @Test
     void getStatistics() {
-        Map<LocalDate, OrdersStatistics> result = ordersManager.getInfo()
+        int year = 2023;
+        int month = 1;
+        var results = ordersManager.getInfo()
                 .getStatistics(
-                        LocalDate.of(year, fromMonth, 1),
-                        LocalDate.of(year, toMonth, 1)
+                        LocalDate.of(year, month, 1),
+                        LocalDate.of(year, month, 1)
                 );
         // Проверяем наличие результатов за каждый месяц.
         // Тестирование конкретных значений отдельно.
-        assertEquals(toMonth - fromMonth + 1, result.size());
-        for (var kvp : result.entrySet()) {
-            assertEquals(year, kvp.getKey().getYear());
-            int month = kvp.getKey().getMonthValue();
-            assertTrue(month >= fromMonth && month <= toMonth);
-            assertNotNull(kvp.getValue());
-        }
-    }
-
-    private List<Order> getOrders() {
-        List<Order> orders = new ArrayList<>();
-        for (int month = fromMonth; month <= toMonth; month++) {
-            int ordersCount = rnd.nextInt(50, 100);
-            for (int i = 1; i <= ordersCount; i++) {
-                long orderId = month * 1000 + i;
-                OrderStatus orderStatus = getRandomOrderStatus();
-                Order order = createOrder(orderId, month, orderStatus);
-                int itemsCount = rnd.nextInt(1, 10);
-                addRandomOrderItems(itemsCount, order);
-                if (orderStatus == OrderStatus.PROCESSING) {
-                    expectedProcessingTotalItems += order.getItemsCount();
-                    expectedProcessingTotalAmount = expectedProcessingTotalAmount.add(order.getTotalAmount());
-                }
-                orders.add(order);
-            }
-        }
-        return orders;
-    }
-
-    private void addRandomOrderItems(int itemsCount, Order order) {
-        for (int oi = 1; oi <= itemsCount; oi++) {
-            addOrderItem(order, String.format("%05d123%05d", order.getId(), oi),
-                    rnd.nextInt(1, 100),
-                    rnd.nextInt(10, 10_000_000) / 100.0);
-        }
-    }
-
-    private OrderStatus getRandomOrderStatus() {
-        int orderStatusRnd = rnd.nextInt(100);
-        OrderStatus orderStatus = orderStatusRnd < 50
-                ? OrderStatus.CLOSED
-                : orderStatusRnd < 80
-                ? OrderStatus.PROCESSING
-                : OrderStatus.CANCELED;
-        return orderStatus;
-    }
-
-    private Order createOrder(long id, int month, OrderStatus status) {
-        return Order.load(id,
-                LocalDateTime.of(year, month, rnd.nextInt(1, 29), rnd.nextInt(24), rnd.nextInt(60)),
-                "", status, new ArrayList<>());
-    }
-
-    private void addOrderItem(Order order, String barcode, int quantity, double price) {
-        Item item = Item.load(new Barcode(barcode), "", ItemStatus.OPEN, new BigDecimal(price));
-        order.addItem(item, quantity);
+        assertEquals(1, results.length);
+        var result = results[0];
+        assertEquals(year, result.getMonth().getYear());
+        assertEquals(month, result.getMonth().getMonthValue());
+        assertEquals(new BigDecimal("8703032.16"), result.getTotalAmount());
+        assertEquals(1186, result.getTotalQuantity());
+        assertEquals(26, result.getTotalItemsCount());
+        assertEquals(new BigDecimal("183274.49"), result.getCancelAmount());
+        assertEquals(24, result.getCancelCount());
     }
 }

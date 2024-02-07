@@ -1,76 +1,83 @@
 package ru.teamscore.java23.orders.model;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import ru.teamscore.java23.orders.model.entities.Order;
-import ru.teamscore.java23.orders.model.enums.OrderStatus;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+import org.hibernate.cfg.Configuration;
+import org.junit.jupiter.api.*;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+import ru.teamscore.java23.orders.model.entities.Item;
+import ru.teamscore.java23.orders.model.entities.OrderItem;
+import ru.teamscore.java23.orders.model.entities.OrderWithItems;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
+import java.io.IOException;
 import java.util.Arrays;
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class OrdersManagerTest {
-    // Набор заказов для теста
-    List<Order> orders = new ArrayList<>();
+    private static EntityManagerFactory entityManagerFactory;
+    private EntityManager entityManager;
+    private OrdersManager ordersManager;
 
-    {
-        orders.add(Order.load(1,
-                LocalDateTime.now(),
-                "Покупатель 1",
-                OrderStatus.PROCESSING,
-                new ArrayList<>()
-        ));
-        orders.add(Order.load(2,
-                LocalDateTime.now(),
-                "Покупатель 2",
-                OrderStatus.PROCESSING,
-                new ArrayList<>()
-        ));
-        orders.add(Order.load(3,
-                LocalDateTime.now(),
-                "Покупатель 3",
-                OrderStatus.PROCESSING,
-                new ArrayList<>()
-        ));
+    @BeforeAll
+    public static void setup() throws IOException {
+        entityManagerFactory = new Configuration()
+                .configure("hibernate-postgres.cfg.xml")
+                .addAnnotatedClass(Item.class)
+                .addAnnotatedClass(OrderWithItems.class)
+                .addAnnotatedClass(OrderItem.class)
+                .buildSessionFactory();
+        SqlScripts.runFromFile(entityManagerFactory, "createSchema.sql");
     }
 
-    // Тестовый OrdersManager
-    OrdersManager ordersManager;
-
-    // Для каждого теста - свой экземпляр
-    @BeforeEach
-    void setUp() {
-        ordersManager = new OrdersManager();
-        for (Order o : orders) {
-            ordersManager.addOrder(o);
+    @AfterAll
+    public static void tearDown() {
+        if (entityManagerFactory != null) {
+            entityManagerFactory.close();
         }
     }
+    @BeforeEach
+    public void openSession() throws IOException {
+        SqlScripts.runFromFile(entityManagerFactory, "insertTestItems.sql");
+        SqlScripts.runFromFile(entityManagerFactory, "insertTestOrders.sql");
+        entityManager = entityManagerFactory.createEntityManager();
+        ordersManager = new OrdersManager(entityManager);
+    }
+
+    @AfterEach
+    public void closeSession() throws IOException {
+        if (entityManager != null) {
+            entityManager.close();
+        }
+        SqlScripts.runFromFile(entityManagerFactory, "clearTestOrders.sql");
+        SqlScripts.runFromFile(entityManagerFactory, "clearTestItems.sql");
+    }
+
 
 
     @Test
     void getOrdersCount() {
-        assertEquals(orders.size(), ordersManager.getOrdersCount());
+        assertEquals(50, ordersManager.getOrdersCount());
     }
 
     @Test
     void getOrdersAll() {
         var allOrders = ordersManager.getOrdersAll();
-        assertEquals(orders.size(), allOrders.length);
-        for (Order order : orders) {
-            assertTrue(Arrays.stream(allOrders)
-                    .anyMatch(o -> o.equals(order)));
+        assertEquals(50, allOrders.length);
+        for (int i = 1; i <= allOrders.length; i++) {
+            int finalId = i;
+            assertTrue(Arrays.stream(allOrders).anyMatch(o -> o.getId() == finalId),
+                    finalId + " id is missing");
         }
     }
 
-    @Test
-    void getOrder() {
-        for (Order order : orders) {
-            assertEquals(order, ordersManager.getOrder(order.getId()).get());
-        }
+    @ParameterizedTest
+    @ValueSource(longs = {1, 5, 15, 28, 50})
+    void getOrder(long id) {
+        var order = ordersManager.getOrder(id);
+        assertTrue(order.isPresent());
+        assertEquals(id, order.get().getId());
     }
-
 }
