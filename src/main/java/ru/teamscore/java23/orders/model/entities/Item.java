@@ -26,8 +26,8 @@ public class Item {
     @Setter
     @Column(name = "barcode", nullable = false, unique = true, length = 13)
     @JdbcTypeCode(SqlTypes.CHAR)
-    //@Convert(converter = BarcodeConverter.class)
-    private String barcode;
+    @Convert(converter = BarcodeConverter.class)
+    private Barcode barcode;
 
     @Getter
     @Setter

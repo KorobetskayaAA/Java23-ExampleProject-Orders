@@ -23,10 +23,6 @@ public class Catalog {
     }
 
     public Optional<Item> getItem(@NonNull Barcode barcode) {
-        return getItem(barcode.toString());
-    }
-
-    public Optional<Item> getItem(@NonNull String barcode) {
         try {
             return Optional.of(entityManager
                     .createNamedQuery("itemByBarcode", Item.class)
@@ -35,6 +31,10 @@ public class Catalog {
         } catch (NoResultException e) {
             return Optional.empty();
         }
+    }
+
+    public Optional<Item> getItem(@NonNull String barcode) {
+        return getItem(new Barcode(barcode));
     }
 
     public Optional<Item> getItem(long id) {
@@ -57,7 +57,9 @@ public class Catalog {
     public Collection<Item> find(String search) {
         String pattern = "%" + search + "%";
         return entityManager
-                .createQuery("from Item where title ilike :pattern or barcode ilike :pattern", Item.class)
+                .createQuery("from Item where title ilike :pattern or " +
+                                "cast(barcode as String) ilike :pattern",
+                        Item.class)
                 .setParameter("pattern", pattern)
                 .getResultList();
     }

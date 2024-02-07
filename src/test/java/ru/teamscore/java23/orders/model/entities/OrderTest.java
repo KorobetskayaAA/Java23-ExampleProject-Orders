@@ -15,25 +15,25 @@ import static org.junit.jupiter.api.Assertions.*;
 class OrderTest {
     Item[] testItems = new Item[]{
             Item.load(1,
-                    "4600000000001",
+                    new Barcode("4600000000001"),
                     "Товар 1",
                     ItemStatus.OPEN,
                     new BigDecimal(99.99)
             ),
             Item.load(2,
-                    "4600000000002",
+                    new Barcode("4600000000002"),
                     "Товар 2",
                     ItemStatus.OPEN,
                     new BigDecimal(2.00)
             ),
             Item.load(3,
-                    "4600000000003",
+                    new Barcode("4600000000003"),
                     "Товар 3",
                     ItemStatus.CLOSED,
                     new BigDecimal(50.05)
             ),
             Item.load(4,
-                    "4600000000004",
+                    new Barcode("4600000000004"),
                     "Товар 4",
                     ItemStatus.OPEN,
                     new BigDecimal(102.50)

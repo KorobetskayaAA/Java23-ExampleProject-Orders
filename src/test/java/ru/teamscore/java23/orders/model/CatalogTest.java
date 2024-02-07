@@ -6,6 +6,7 @@ import org.hibernate.cfg.Configuration;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import ru.teamscore.java23.orders.model.entities.Barcode;
 import ru.teamscore.java23.orders.model.entities.Item;
 import ru.teamscore.java23.orders.model.enums.CatalogSortOption;
 import ru.teamscore.java23.orders.model.enums.ItemStatus;
@@ -59,7 +60,7 @@ class CatalogTest {
         Catalog catalog = new Catalog(entityManager);
         var result = catalog.getItem(barcode);
         assertTrue(result.isPresent());
-        assertEquals(barcode, result.get().getBarcode());
+        assertEquals(barcode, result.get().getBarcode().toString());
     }
 
     @ParameterizedTest
@@ -85,14 +86,14 @@ class CatalogTest {
         Item[] itemsToAdd = new Item[]{
                 Item.load(
                         0,
-                        "4601000000001",
+                        new Barcode("4601000000001"),
                         "Товар 1",
                         ItemStatus.OPEN,
                         new BigDecimal(99.99)
                 ),
                 Item.load(
                         0,
-                        "4600100000002",
+                        new Barcode("4600100000002"),
                         "Товар 2",
                         ItemStatus.OPEN,
                         new BigDecimal(2.00)

@@ -10,7 +10,7 @@ class ItemTest {
     @Test
     void isAvaliable() {
         Item item = new Item();
-        item.setBarcode("1234567890123");
+        item.setBarcode(new Barcode("1234567890123"));
         assertFalse(item.isAvailable());
         item.open();
         assertTrue(item.isAvailable());
