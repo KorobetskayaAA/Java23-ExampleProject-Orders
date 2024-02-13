@@ -1,0 +1,1 @@
+truncate table "orders"."order" restart identity cascade;

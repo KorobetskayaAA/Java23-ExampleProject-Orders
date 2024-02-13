@@ -1,54 +1,34 @@
 package ru.teamscore.java23.orders.model.entities;
 
-import lombok.*;
-import ru.teamscore.java23.orders.model.enums.OrderStatus;
-import ru.teamscore.java23.orders.model.exceptions.OrderSetStatusException;
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.NonNull;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
-@EqualsAndHashCode
+@NoArgsConstructor
 @AllArgsConstructor(staticName = "load")
-public class Order {
+@Entity
+@Table(name = "order", schema = "orders")
+public class OrderWithItems {
     @Getter
-    private final long id;
-
-    @Getter
-    private final LocalDateTime created;
-
-    @Getter
-    @Setter
-    private String customerName;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private long id = 0;
 
     @Getter
-    private OrderStatus status = OrderStatus.PROCESSING;
+    @Embedded
+    private CustomerOrder order = new CustomerOrder();
 
-    private final List<OrderItem> items;
-
-    public Order(int id) {
-        this.id = id;
-        created = LocalDateTime.now();
-        items = new ArrayList<>();
-    }
-
-    public void close() {
-        if (status == OrderStatus.CANCELED) {
-            throw new OrderSetStatusException("Нельзя завершить отмененный заказ", status, OrderStatus.CLOSED);
-        }
-        status = OrderStatus.CLOSED;
-    }
-
-    public void cancel() {
-        if (status == OrderStatus.CLOSED) {
-            throw new OrderSetStatusException("Нельзя отменить закрытый заказ", status, OrderStatus.CANCELED);
-        }
-        status = OrderStatus.CANCELED;
-    }
+    @OneToMany(mappedBy = "pk.order", cascade = CascadeType.ALL)
+    private List<OrderItem> items = new ArrayList<>();
 
     public BigDecimal getTotalAmount() {
         return items.stream()
@@ -77,21 +57,31 @@ public class Order {
                 .findFirst();
     }
 
+    public Optional<OrderItem> getItem(@NonNull String barcode) {
+        return getItem(new Barcode(barcode));
+    }
+
     public Optional<OrderItem> getItem(@NonNull Item item) {
         return items.stream()
                 .filter(oi -> oi.getItem().equals(item))
                 .findFirst();
     }
 
+    public Optional<OrderItem> getItem(@NonNull long itemId) {
+        return items.stream()
+                .filter(oi -> oi.getItem().getId() == itemId)
+                .findFirst();
+    }
+
     public OrderItem addItem(@NonNull Item item, int quantity) {
         // уже есть такой Item в списке
-        var existingItem = getItem(item.getBarcode());
+        var existingItem = getItem(item);
         if (existingItem.isPresent()) {
             existingItem.get().addQuantity(quantity);
             return existingItem.get();
         }
         // новый Item
-        OrderItem oi = new OrderItem(item, quantity);
+        OrderItem oi = new OrderItem(item, this, quantity);
         items.add(oi);
         return oi;
     }
@@ -108,38 +98,15 @@ public class Order {
         return exisitngItem;
     }
 
+    public Optional<OrderItem> removeItem(String barcode) {
+        return removeItem(new Barcode(barcode));
+    }
+
     public Optional<OrderItem> removeItem(Item item) {
         var exisitngItem = getItem(item);
         if (exisitngItem.isPresent()) {
             items.remove(exisitngItem.get());
         }
         return exisitngItem;
-    }
-
-    @AllArgsConstructor(staticName = "load")
-    public static class OrderItem {
-        @Getter
-        private final Item item;
-        @Getter
-        @Setter
-        private int quantity = 1;
-        @Getter
-        private BigDecimal price;
-
-        public BigDecimal getAmount() {
-            return price.multiply(new BigDecimal(quantity))
-                    .setScale(2, RoundingMode.HALF_UP);
-        }
-
-        public int addQuantity(int quantity) {
-            this.quantity += quantity;
-            return this.quantity;
-        }
-
-        public OrderItem(@NonNull Item item, int quantity) {
-            this.item = item;
-            this.price = item.getPrice();
-            this.quantity = quantity;
-        }
     }
 }

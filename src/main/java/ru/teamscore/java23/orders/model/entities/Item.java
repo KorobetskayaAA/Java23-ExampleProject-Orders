@@ -1,30 +1,49 @@
 package ru.teamscore.java23.orders.model.entities;
 
+import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import ru.teamscore.java23.orders.model.enums.ItemStatus;
 
 import java.math.BigDecimal;
 import java.util.Objects;
 
 @ToString
-@RequiredArgsConstructor()
 @AllArgsConstructor(staticName = "load")
+@NoArgsConstructor
+@Entity
+@Table(name = "item", schema = "catalog")
+@NamedQuery(name = "itemsCount", query = "select count(*) from Item")
+@NamedQuery(name = "itemByBarcode", query = "from Item i where i.barcode = :barcode")
 public class Item {
     @Getter
-    private final Barcode barcode;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private long id;
 
     @Getter
     @Setter
+    @Column(name = "barcode", nullable = false, unique = true, length = 13)
+    @JdbcTypeCode(SqlTypes.CHAR)
+    @Convert(converter = BarcodeConverter.class)
+    private Barcode barcode;
+
+    @Getter
+    @Setter
+    @Column(columnDefinition = "text")
     private String title;
 
+    @Enumerated(EnumType.STRING)
     private ItemStatus status = ItemStatus.CLOSED;
 
     @Getter
     @Setter
+    @Column(columnDefinition = "decimal(10,2)")
     private BigDecimal price;
 
-    public boolean isAvaliable() {
-        return status.isAvaliable();
+    public boolean isAvailable() {
+        return status.isAvailable();
     }
 
     public void open() {
@@ -39,11 +58,11 @@ public class Item {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof Item item)) return false;
-        return Objects.equals(barcode, item.barcode);
+        return Objects.equals(id, item.getId());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(barcode);
+        return Objects.hashCode(id);
     }
 }

@@ -1,77 +1,93 @@
 package ru.teamscore.java23.orders.model;
 
+import jakarta.persistence.EntityManager;
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import ru.teamscore.java23.orders.model.entities.Item;
-import ru.teamscore.java23.orders.model.entities.Order;
+import ru.teamscore.java23.orders.model.entities.OrderItem;
+import ru.teamscore.java23.orders.model.entities.OrderWithItems;
 import ru.teamscore.java23.orders.model.enums.OrderStatus;
 import ru.teamscore.java23.orders.model.statistics.OrdersStatistics;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 
 @RequiredArgsConstructor
 public class OrdersManager {
-    private final List<Order> orders = new ArrayList<>();
+    private final EntityManager entityManager;
 
     @Getter()
     private final OrderInfoManager info = new OrderInfoManager();
 
-    public int getOrdersCount() {
-        return orders.size();
+    public long getOrdersCount() {
+        return entityManager
+                .createQuery("select count(*) from OrderWithItems", Long.class)
+                .getSingleResult();
     }
 
-    public Order[] getOrdersAll() {
-        return orders.stream().toArray(Order[]::new);
+    public OrderWithItems[] getOrdersAll() {
+        return entityManager
+                .createQuery("from OrderWithItems order by id", OrderWithItems.class)
+                .getResultList()
+                .toArray(OrderWithItems[]::new);
     }
 
-    public Optional<Order> getOrder(long id) {
-        return orders.stream()
-                .filter(o -> o.getId() == id)
-                .findFirst();
+    public Optional<OrderWithItems> getOrder(long id) {
+        return Optional.of(
+                entityManager.find(OrderWithItems.class, id)
+        );
     }
 
-    public void addOrder(Order order) {
-        if (getOrder(order.getId()).isEmpty()) {
-            orders.add(order);
+    public void addOrder(OrderWithItems order) {
+        var transaction = entityManager.getTransaction();
+        transaction.begin();
+        try {
+            entityManager.persist(order);
+            transaction.commit();
+        } catch (Exception e) {
+            transaction.rollback();
+            throw e;
         }
+    }
+
+    public void updateOrder(@NonNull OrderWithItems order) {
+        entityManager.getTransaction().begin();
+        entityManager.merge(order);
+        entityManager.getTransaction().commit();
     }
 
     public class OrderInfoManager {
         public BigDecimal getProcessingTotalAmount() {
-            return orders.stream()
-                    .filter(o -> o.getStatus() == OrderStatus.PROCESSING)
-                    .map(o -> o.getTotalAmount())
-                    .reduce(BigDecimal.ZERO, (total, amount) -> total.add(amount))
-                    .setScale(2);
+            var result = entityManager
+                    .createQuery("select sum(oi.price * oi.quantity) from OrderItem oi " +
+                                    "where oi.pk.order.order.status = :status",
+                            BigDecimal.class)
+                    .setParameter("status", OrderStatus.PROCESSING)
+                    .getSingleResult();
+            return (result == null) ? BigDecimal.ZERO : result.setScale(2);
         }
 
         public Item[] getProcessingOrderItems() {
-            return orders.stream()
-                    .filter(o -> o.getStatus() == OrderStatus.PROCESSING)
-                    .flatMap(o -> o.getItemsAll().stream().map(oi -> oi.getItem()))
-                    .distinct()
+            return entityManager
+                    .createQuery("select distinct oi.pk.item from OrderItem as oi " +
+                                    "where oi.pk.order.order.status = :status",
+                            OrderItem.class)
+                    .setParameter("status", OrderStatus.PROCESSING)
+                    .getResultList()
                     .toArray(Item[]::new);
         }
 
-        public Map<LocalDate, OrdersStatistics> getStatistics(LocalDate from, LocalDate to) {
-            Map<LocalDate, List<Order>> ordersByMonth = orders.stream()
-                    .filter(o -> {
-                        var created = o.getCreated();
-                        return created.isAfter(from.atStartOfDay()) &&
-                                created.isBefore(to.plusDays(1).atStartOfDay());
-                    })
-                    .collect(Collectors.groupingBy(o -> o.getCreated().withDayOfMonth(1).toLocalDate()));
-            return ordersByMonth.entrySet().stream()
-                    .map(entry -> Map.entry(entry.getKey(),
-                            new OrdersStatistics(entry.getValue())))
-                    .collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue()));
+        public OrdersStatistics[] getStatistics(LocalDate from, LocalDate to) {
+            return entityManager
+                    .createQuery("from OrdersStatistics where month between :from and :to",
+                            OrdersStatistics.class)
+                    .setParameter("from", from)
+                    .setParameter("to", to)
+                    .getResultList()
+                    .toArray(OrdersStatistics[]::new);
         }
     }
 }

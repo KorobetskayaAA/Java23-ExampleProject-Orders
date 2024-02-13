@@ -1,114 +1,166 @@
 package ru.teamscore.java23.orders.model;
 
-import org.junit.jupiter.api.Test;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+import org.hibernate.cfg.Configuration;
+import org.junit.jupiter.api.*;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import ru.teamscore.java23.orders.model.entities.Barcode;
 import ru.teamscore.java23.orders.model.entities.Item;
 import ru.teamscore.java23.orders.model.enums.CatalogSortOption;
 import ru.teamscore.java23.orders.model.enums.ItemStatus;
 
+import java.io.IOException;
 import java.math.BigDecimal;
-import java.util.Collection;
+import java.util.function.BiPredicate;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 class CatalogTest {
-    Item[] testItems = new Item[]{
-            Item.load(
-                    new Barcode("4600000000001"),
-                    "Товар 1",
-                    ItemStatus.OPEN,
-                    new BigDecimal(99.99)
-            ),
-            Item.load(
-                    new Barcode("4600000000002"),
-                    "Товар 2",
-                    ItemStatus.OPEN,
-                    new BigDecimal(2.00)
-            ),
-            Item.load(
-                    new Barcode("4600000000003"),
-                    "Товар 3",
-                    ItemStatus.CLOSED,
-                    new BigDecimal(50.05)
-            ),
-            Item.load(
-                    new Barcode("4600000000004"),
-                    "Товар 4",
-                    ItemStatus.OPEN,
-                    new BigDecimal(102.50)
-            )
-    };
+
+    private static EntityManagerFactory entityManagerFactory;
+    private EntityManager entityManager;
+
+    @BeforeAll
+    public static void setup() throws IOException {
+        entityManagerFactory = new Configuration()
+                .configure("hibernate-postgres.cfg.xml")
+                .addAnnotatedClass(Item.class)
+                .buildSessionFactory();
+
+        SqlScripts.runFromFile(entityManagerFactory, "createSchema.sql");
+    }
+
+    @AfterAll
+    public static void tearDown() {
+        if (entityManagerFactory != null) {
+            entityManagerFactory.close();
+        }
+    }
+
+    @BeforeEach
+    public void openSession() throws IOException {
+        SqlScripts.runFromFile(entityManagerFactory, "insertTestItems.sql");
+        entityManager = entityManagerFactory.createEntityManager();
+    }
+
+    @AfterEach
+    public void closeSession() throws IOException {
+        if (entityManager != null) {
+            entityManager.close();
+        }
+        SqlScripts.runFromFile(entityManagerFactory, "clearTestItems.sql");
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"4601234500001", "4601234500010", "4601234500030"})
+    void getItemExists(String barcode) {
+        Catalog catalog = new Catalog(entityManager);
+        var result = catalog.getItem(barcode);
+        assertTrue(result.isPresent());
+        assertEquals(barcode, result.get().getBarcode().toString());
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {1, 5, 30})
+    void getItemExists(long id) {
+        Catalog catalog = new Catalog(entityManager);
+        var result = catalog.getItem(id);
+        assertTrue(result.isPresent());
+        assertEquals(id, result.get().getId());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"9901234500001", "0000000000000", "1234567890123"})
+    void getItemNotExists(String barcode) {
+        Catalog catalog = new Catalog(entityManager);
+        var result = catalog.getItem(barcode);
+        assertTrue(result.isEmpty());
+    }
 
     @Test
     void addItem() {
-        Catalog catalog = new Catalog();
-        catalog.addItem(testItems[0]);
-        assertEquals(1, catalog.getItemsCount());
-        catalog.addItem(testItems[0]);
-        assertEquals(1, catalog.getItemsCount());
-        catalog.addItem(testItems[1]);
-        assertEquals(2, catalog.getItemsCount());
+        Catalog catalog = new Catalog(entityManager);
+        Item[] itemsToAdd = new Item[]{
+                Item.load(
+                        0,
+                        new Barcode("4601000000001"),
+                        "Товар 1",
+                        ItemStatus.OPEN,
+                        new BigDecimal(99.99)
+                ),
+                Item.load(
+                        0,
+                        new Barcode("4600100000002"),
+                        "Товар 2",
+                        ItemStatus.OPEN,
+                        new BigDecimal(2.00)
+                )
+        };
+        long startCount = catalog.getItemsCount();
+        assertTrue(catalog.getItem(itemsToAdd[0].getBarcode()).isEmpty(), "Item not exists before add");
+        assertTrue(catalog.getItem(itemsToAdd[1].getBarcode()).isEmpty(), "Item not exists before add");
+        catalog.addItem(itemsToAdd[0]);
+        assertEquals(startCount + 1, catalog.getItemsCount(), "Item added");
+        assertTrue(catalog.getItem(itemsToAdd[0].getBarcode()).isPresent());
+        catalog.addItem(itemsToAdd[0]);
+        assertEquals(startCount + 1, catalog.getItemsCount(), "Item not added, already exists");
+        catalog.addItem(itemsToAdd[1]);
+        assertEquals(startCount + 2, catalog.getItemsCount(), "Item added");
     }
 
     @Test
-    void getItem() {
-        Catalog catalog = new Catalog();
-        catalog.addItem(testItems[1]);
-        catalog.addItem(testItems[0]);
-        catalog.addItem(testItems[2]);
-        testHasItem(testItems[0], catalog);
-        testHasItem(testItems[1], catalog);
-        testHasItem(testItems[2], catalog);
+    void updateItem() {
+        long itemId = 1;
+        BigDecimal priceToAdd = BigDecimal.valueOf(10);
+        Catalog catalog = new Catalog(entityManager);
+        // get some item from DB
+        var existingItem = catalog.getItem(itemId);
+        assertTrue(existingItem.isPresent(), "Item with id = " + itemId + " should exist");
+        Item item = existingItem.get();
+        // change item and save to DB
+        item.setPrice(item.getPrice().add(priceToAdd));
+        catalog.updateItem(item);
+        // reload item from DB again and assure it changed
+        var itemAfterUpdate = catalog.getItem(itemId);
+        assertTrue(itemAfterUpdate.isPresent(), "Item with id = " + itemId + " disappeared after update");
+        assertEquals(item.getPrice(), itemAfterUpdate.get().getPrice());
+        // just getting sure that we reloaded item and it is no the same one object
+        assertNotSame(item, itemAfterUpdate);
     }
-
-    private void testHasItem(Item expectedItem, Catalog catalog) {
-        var result = catalog.getItem(expectedItem.getBarcode());
-        assertTrue(result.isPresent());
-        assertEquals(expectedItem, result.get());
-    }
-
 
     @Test
     void find() {
-        Catalog catalog = new Catalog();
-        for (Item item : testItems) {
-            catalog.addItem(item);
-        }
+        Catalog catalog = new Catalog(entityManager);
         var result = catalog.find("qwert");
-        assertItems(new Item[]{}, catalog, result);
+        assertEquals(0, result.size());
         result = catalog.find("46");
-        assertItems(testItems, catalog, result);
-        result = catalog.find(testItems[0].getBarcode().toString());
-        assertItems(new Item[]{testItems[0]}, catalog, result);
+        assertEquals(30, result.size());
+        result = catalog.find("4601234500007");
+        assertEquals(1, result.size());
     }
 
     @Test
     void getSorted() {
-        Catalog catalog = new Catalog();
-        for (Item item : testItems) {
-            catalog.addItem(item);
-        }
-        var result = catalog.getSorted(CatalogSortOption.TITLE, false, 0, 10);
-        assertItems(testItems, catalog, result);
-        result = catalog.getSorted(CatalogSortOption.TITLE, true, 0, 10);
-        assertItems(new Item[]{testItems[3], testItems[2], testItems[1], testItems[0]},
-                catalog, result);
-        result = catalog.getSorted(CatalogSortOption.TITLE, false, 0, 3);
-        assertItems(new Item[]{testItems[0], testItems[1], testItems[2]},
-                catalog, result);
-        result = catalog.getSorted(CatalogSortOption.TITLE, false, 1, 3);
-        assertItems(new Item[]{testItems[3]},
-                catalog, result);
-        result = catalog.getSorted(CatalogSortOption.PRICE, false, 0, 10);
-        assertItems(new Item[]{testItems[1], testItems[2], testItems[0], testItems[3]},
-                catalog, result);
+        Catalog catalog = new Catalog(entityManager);
+        testSorted(catalog, CatalogSortOption.TITLE, false, 0, 10,
+                (i1, i2) -> i1.getTitle().compareTo(i2.getTitle()) >= 0);
+        testSorted(catalog, CatalogSortOption.TITLE, true, 0, 10,
+                (i1, i2) -> i1.getTitle().compareTo(i2.getTitle()) <= 0);
+        testSorted(catalog, CatalogSortOption.PRICE, false, 1, 3,
+                (i1, i2) -> i1.getPrice().compareTo(i2.getPrice()) >= 0);
+        testSorted(catalog, CatalogSortOption.PRICE, true, 5, 5,
+                (i1, i2) -> i1.getPrice().compareTo(i2.getPrice()) <= 0);
     }
 
-    private void assertItems(Item[] expectedItems, Catalog catalog, Collection<Item> result) {
-        assertEquals(expectedItems.length, result.size(), "Wrong length");
-        for (Item item : expectedItems) {
-            assertTrue(result.contains(item), "Item missed " + item.getBarcode());
+    private void testSorted(Catalog catalog,
+                            CatalogSortOption option, boolean desc, int page, int pageSize,
+                            BiPredicate<Item, Item> compare) {
+        var result = catalog.getSorted(option, desc, page, pageSize);
+        assertEquals(pageSize, result.length);
+        for (int i = 1; i < result.length; i++) {
+            assertTrue(compare.test(result[i], result[i - 1]));
         }
     }
 }

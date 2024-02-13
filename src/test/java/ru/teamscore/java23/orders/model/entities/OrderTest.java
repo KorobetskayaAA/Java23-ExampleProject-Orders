@@ -14,49 +14,54 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class OrderTest {
     Item[] testItems = new Item[]{
-            Item.load(
+            Item.load(1,
                     new Barcode("4600000000001"),
                     "Товар 1",
                     ItemStatus.OPEN,
                     new BigDecimal(99.99)
             ),
-            Item.load(
+            Item.load(2,
                     new Barcode("4600000000002"),
                     "Товар 2",
                     ItemStatus.OPEN,
                     new BigDecimal(2.00)
             ),
-            Item.load(
+            Item.load(3,
                     new Barcode("4600000000003"),
                     "Товар 3",
                     ItemStatus.CLOSED,
                     new BigDecimal(50.05)
             ),
-            Item.load(
+            Item.load(4,
                     new Barcode("4600000000004"),
                     "Товар 4",
                     ItemStatus.OPEN,
                     new BigDecimal(102.50)
             )
     };
-    Order.OrderItem[] testOrderItems = new Order.OrderItem[]{
-            Order.OrderItem.load(testItems[0], 1, testItems[0].getPrice()),
-            Order.OrderItem.load(testItems[1], 100, BigDecimal.TEN),
-            Order.OrderItem.load(testItems[2], 9, testItems[2].getPrice())
+    OrderItem[] testOrderItems = new OrderItem[]{
+            new OrderItem(testItems[0], new OrderWithItems(), 1),
+            new OrderItem(testItems[1], new OrderWithItems(), 100),
+            new OrderItem(testItems[2], new OrderWithItems(), 9)
     };
 
-    private Order getOrderWithItems() {
-        return Order.load(1,
-                LocalDateTime.now(),
-                "Тестовый Покупатель",
-                OrderStatus.PROCESSING,
+    {
+        testOrderItems[1].setPrice(BigDecimal.TEN);
+    }
+
+    private OrderWithItems getOrderWithItems() {
+        return OrderWithItems.load(1,
+                new CustomerOrder(
+                        LocalDateTime.now(),
+                        "Тестовый Покупатель",
+                        OrderStatus.PROCESSING),
                 new ArrayList<>(Arrays.stream(testOrderItems).toList())
         );
     }
 
     @Test
     void close() {
-        Order order = getOrderWithItems();
+        var order = new CustomerOrder();
         assertEquals(OrderStatus.PROCESSING, order.getStatus());
         order.close();
         assertEquals(OrderStatus.CLOSED, order.getStatus());
@@ -69,7 +74,7 @@ class OrderTest {
 
     @Test
     void cancel() {
-        Order order = getOrderWithItems();
+        var order = new CustomerOrder();
         assertEquals(OrderStatus.PROCESSING, order.getStatus());
         order.cancel();
         assertEquals(OrderStatus.CANCELED, order.getStatus());
@@ -82,7 +87,7 @@ class OrderTest {
 
     @Test
     void getItemsAll() {
-        Order order = getOrderWithItems();
+        var order = getOrderWithItems();
         var itemsAll = order.getItemsAll();
         assertEquals(testOrderItems.length, itemsAll.size());
         for (var item : itemsAll) {
@@ -103,20 +108,20 @@ class OrderTest {
 
     @Test
     void getTotalAmount() {
-        Order order = getOrderWithItems();
+        var order = getOrderWithItems();
         assertEquals("1550.44", order.getTotalAmount().toPlainString());
     }
 
     @Test
     void getItemsCount() {
-        Order order = getOrderWithItems();
+        var order = getOrderWithItems();
         assertEquals(testOrderItems.length, order.getItemsCount());
     }
 
     @Test
     void getItem() {
-        Order order = getOrderWithItems();
-        Barcode barcode = testOrderItems[1].getItem().getBarcode();
+        var order = getOrderWithItems();
+        var barcode = testOrderItems[1].getItem().getBarcode();
         var orderItem = order.getItem(barcode);
         assertTrue(orderItem.isPresent());
         assertEquals(testOrderItems[1], orderItem.get());
@@ -124,9 +129,9 @@ class OrderTest {
 
     @Test
     void addItem() {
-        Order order = getOrderWithItems();
+        var order = getOrderWithItems();
         Item itemToAdd = testItems[testItems.length - 1];
-        Order.OrderItem addedItem = order.addItem(itemToAdd, 2);
+        OrderItem addedItem = order.addItem(itemToAdd, 2);
         assertEquals(testOrderItems.length + 1, order.getItemsAll().size());
         assertEquals(2, addedItem.getQuantity());
         addedItem = order.addItem(itemToAdd);
@@ -136,7 +141,7 @@ class OrderTest {
 
     @Test
     void removeItem() {
-        Order order = getOrderWithItems();
+        var order = getOrderWithItems();
         Item itemToRemove = testItems[0];
         var removedItem = order.removeItem(itemToRemove.getBarcode());
         assertEquals(testOrderItems.length - 1, order.getItemsAll().size());

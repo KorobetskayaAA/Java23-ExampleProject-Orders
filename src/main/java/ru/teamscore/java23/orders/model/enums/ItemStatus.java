@@ -7,9 +7,9 @@ public enum ItemStatus {
     CLOSED(false);
 
     @Getter
-    private boolean avaliable;
+    private boolean available;
 
-    ItemStatus(boolean avaliable) {
-        this.avaliable = avaliable;
+    ItemStatus(boolean available) {
+        this.available = available;
     }
 }

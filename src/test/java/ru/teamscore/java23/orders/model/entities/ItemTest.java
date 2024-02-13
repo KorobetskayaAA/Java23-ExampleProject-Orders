@@ -9,13 +9,14 @@ class ItemTest {
 
     @Test
     void isAvaliable() {
-        Item item = new Item(new Barcode("1234567890123"));
-        assertFalse(item.isAvaliable());
+        Item item = new Item();
+        item.setBarcode(new Barcode("1234567890123"));
+        assertFalse(item.isAvailable());
         item.open();
-        assertTrue(item.isAvaliable());
+        assertTrue(item.isAvailable());
         item.close();
-        assertFalse(item.isAvaliable());
+        assertFalse(item.isAvailable());
         item.open();
-        assertTrue(item.isAvaliable());
+        assertTrue(item.isAvailable());
     }
 }

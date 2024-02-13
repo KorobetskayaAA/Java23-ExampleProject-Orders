@@ -1,50 +1,89 @@
 package ru.teamscore.java23.orders.model;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.criteria.Root;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import ru.teamscore.java23.orders.model.entities.Barcode;
 import ru.teamscore.java23.orders.model.entities.Item;
 import ru.teamscore.java23.orders.model.enums.CatalogSortOption;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Optional;
 
 @RequiredArgsConstructor
 public class Catalog {
-    private final List<Item> items = new ArrayList<>();
+    private final EntityManager entityManager;
 
-    public int getItemsCount() {
-        return items.size();
+    public long getItemsCount() {
+        return entityManager
+                .createNamedQuery("itemsCount", Long.class)
+                .getSingleResult();
     }
 
     public Optional<Item> getItem(@NonNull Barcode barcode) {
-        return items.stream()
-                .filter(i -> i.getBarcode().equals(barcode))
-                .findFirst();
+        try {
+            return Optional.of(entityManager
+                    .createNamedQuery("itemByBarcode", Item.class)
+                    .setParameter("barcode", barcode)
+                    .getSingleResult());
+        } catch (NoResultException e) {
+            return Optional.empty();
+        }
+    }
+
+    public Optional<Item> getItem(@NonNull String barcode) {
+        return getItem(new Barcode(barcode));
+    }
+
+    public Optional<Item> getItem(long id) {
+        return Optional.of(entityManager.find(Item.class, id));
+    }
+
+    public Optional<Item> getItem(@NonNull Item item) {
+        if (entityManager.contains(item)) {
+            return Optional.of(item);
+        }
+        return getItem(item.getId());
     }
 
     public void addItem(@NonNull Item item) {
-        if (getItem(item.getBarcode()).isEmpty()) {
-            items.add(item);
-        }
+        entityManager.getTransaction().begin();
+        entityManager.persist(item);
+        entityManager.getTransaction().commit();
+    }
+
+    public void updateItem(@NonNull Item item) {
+        entityManager.getTransaction().begin();
+        entityManager.merge(item);
+        entityManager.getTransaction().commit();
     }
 
     public Collection<Item> find(String search) {
-        String pattern = ".*" + search + ".*";
-        return items.stream()
-                .filter(i -> i.getTitle().matches(pattern) ||
-                        i.getBarcode().toString().matches(pattern))
-                .toList();
+        String pattern = "%" + search + "%";
+        return entityManager
+                .createQuery("from Item where title ilike :pattern or " +
+                                "cast(barcode as String) ilike :pattern",
+                        Item.class)
+                .setParameter("pattern", pattern)
+                .getResultList();
     }
 
-    public Collection<Item> getSorted(CatalogSortOption option, boolean desc, int page, int pageSize) {
-        Comparator comparator = option.getComparator();
-        if (desc) {
-            comparator = comparator.reversed();
-        }
-        return items.stream()
-                .sorted(comparator)
-                .skip(page * pageSize)
-                .limit(pageSize)
-                .toList();
+    public Item[] getSorted(CatalogSortOption option, boolean desc, int page, int pageSize) {
+        var query = entityManager.getCriteriaBuilder()
+                .createQuery(Item.class);
+        Root<Item> root = query.from(Item.class);
+        var sortBy = root.get(option.getColumnName());
+        var order = desc
+                ? entityManager.getCriteriaBuilder().desc(sortBy)
+                : entityManager.getCriteriaBuilder().asc(sortBy);
+        query.orderBy(order);
+        return entityManager
+                .createQuery(query)
+                .setFirstResult(page * pageSize)
+                .setMaxResults(pageSize)
+                .getResultList()
+                .toArray(Item[]::new);
     }
 }
