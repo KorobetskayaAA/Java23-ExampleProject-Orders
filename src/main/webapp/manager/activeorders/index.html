@@ -22,6 +22,12 @@
     />
 
     <link href="../_css/style.css" rel="stylesheet" />
+
+    <script src="../_js/helpers.js"></script>
+    <script src="../_js/components.js"></script>
+    <script src="./_js/mock.js"></script>
+    <script src="./_js/api.js"></script>
+    <script src="./_js/main.js"></script>
   </head>
   <body>
     <header class="bg-dark p-3">
@@ -61,37 +67,62 @@
         </div>
       </div>
       <div class="row my-3">
+        <div class="col text-center">
+          <div id="loading" class="spinner-border" hidden>
+            <span class="visually-hidden">Загрузка...</span>
+          </div>
+        </div>
+      </div>
+      <div id="loading" class="row my-3">
         <div class="col">
-          <table class="table table-hover">
+          <div class="alert alert-danger" id="alert" hidden></div>
+        </div>
+      </div>
+      <div class="row my-3">
+        <div class="col">
+          <table id="table-active_order_items" class="table table-hover" hidden>
             <thead class="table-primary">
               <tr>
                 <th scope="col">Штрих-код</th>
-                <th scope="col"><a href="#" class="link-body-emphasis">Название</a></th>
-                <th scope="col"><a href="#" class="link-body-emphasis">Цена<i class="bi bi-sort-down-alt m-1"></i></a></th>
-                <th scope="col"><a href="#" class="link-body-emphasis">Заказано шт.</a></th>
+                <th scope="col">
+                  <a href="#" class="link-body-emphasis" sortby="title"
+                    >Название <i class="bi ml-1"></i
+                  ></a>
+                </th>
+                <th scope="col">
+                  <a
+                    href="#"
+                    class="sort-option link-body-emphasis"
+                    sortby="price"
+                    >Цена <i class="bi ml-1"></i
+                  ></a>
+                </th>
+                <th scope="col">
+                  <a
+                    href="#"
+                    class="sort-option link-body-emphasis"
+                    sortby="quantity"
+                    >Заказано, шт. <i class="bi ml-1"></i
+                  ></a>
+                </th>
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td>4601234500002</th>
+              <!--tr>
+                <td>4601234500002</td>
                 <td>Тостер</td>
                 <td class="td-number">1&nbsp;835,93</td>
                 <td class="td-number">1</td>
-              </tr>
-              <tr>
-                <td>4601234500001</th>
-                <td>Чайник электрический</td>
-                <td class="td-number">2&nbsp;511,64</td>
-                <td class="td-number">5</td>
-              </tr>
+              </tr-->
             </tbody>
           </table>
         </div>
       </div>
       <div class="row my-3">
         <div class="col">
-          <div class="alert alert-info text-end">
-            Общая сумма: <strong> 1&nbsp;234&nbsp;567,89</strong>
+          <div id="total" class="alert alert-info text-end">
+            Общая сумма:
+            <strong id="total_value"></strong>
           </div>
         </div>
       </div>

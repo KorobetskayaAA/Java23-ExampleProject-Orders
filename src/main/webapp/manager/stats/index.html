@@ -22,6 +22,12 @@
     />
 
     <link href="../_css/style.css" rel="stylesheet" />
+
+    <script src="../_js/helpers.js"></script>
+    <script src="../_js/components.js"></script>
+    <script src="./_js/mock.js"></script>
+    <script src="./_js/api.js"></script>
+    <script src="./_js/main.js"></script>
   </head>
   <body>
     <header class="bg-dark p-3">
@@ -63,16 +69,28 @@
       <div class="row my-3">
         <div class="col-sm-3">
           <label for="periodFrom" class="form-label">С</label>
-          <input type="date" id="periodFrom" class="form-control" value="2023-12-01"/>
+          <input type="date" id="input-period_from" class="form-control" value="2023-12-01"/>
         </div>
         <div class="col-sm-3">
           <label for="periodTo" class="form-label">По</label>
-          <input type="date" id="periodTo" class="form-control" value="2024-01-31" />
+          <input type="date" id="input-period_to" class="form-control" value="2024-01-31" />
+        </div>
+      </div>
+      <div class="row my-3" id="block-loading" hidden>
+        <div class="col text-center">
+          <div class="spinner-border">
+            <span class="visually-hidden">Загрузка...</span>
+          </div>
+        </div>
+      </div>
+      <div id="block-alert" class="row my-3" hidden>
+        <div class="col">
+          <div class="alert alert-danger"></div>
         </div>
       </div>
       <div class="row my-3">
         <div class="col">
-          <table class="table">
+          <table class="table" id="table-stats">
             <thead class="table-primary">
               <tr>
                 <th scope="col">Год</th>

@@ -22,6 +22,12 @@
     />
 
     <link href="../_css/style.css" rel="stylesheet" />
+
+    <script src="../_js/helpers.js"></script>
+    <script src="../_js/components.js"></script>
+    <script src="./_js/mock.js"></script>
+    <script src="./_js/api.js"></script>
+    <script src="./_js/main.js"></script>
   </head>
   <body>
     <header class="bg-dark p-3">
@@ -66,7 +72,7 @@
           <input
             type="text"
             class="form-control"
-            id="searchItem"
+            id="input-search"
             placeholder="Введите штрих-код или часть названия"
           />
         </div>
@@ -74,15 +80,32 @@
       <div class="row">
         <div class="col my-2 d-flex gap-3">
           <label>Сортировка:</label>
-          <a href="#" class="link-body-emphasis">Название</a>
+          <a href="#" class="link-body-emphasis" sortBy="title"
+            >Название<i class="bi m-1"></i
+          ></a>
 
-          <a href="#" class="link-body-emphasis"
-            >Цена<i class="bi bi-sort-down-alt m-1"></i
+          <a href="#" class="link-body-emphasis" sortBy="price"
+            >Цена<i class="bi m-1"></i
           ></a>
         </div>
       </div>
-      <div class="my-3 row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3">
+      <div class="row my-3">
+        <div class="col text-center">
+          <div id="loading" class="spinner-border" hidden>
+            <span class="visually-hidden">Загрузка...</span>
+          </div>
+        </div>
+      </div>
+      <div id="loading" class="row my-3">
         <div class="col">
+          <div class="alert alert-danger" id="alert" hidden></div>
+        </div>
+      </div>
+      <div
+        class="my-3 row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3"
+        id="catalog-container"
+      >
+        <!--div class="col">
           <div class="card product-card">
             <div
               class="card-header align-content-center d-flex justify-content-between"
@@ -95,65 +118,12 @@
             </div>
           </div>
         </div>
-
-        <div class="col">
-          <div class="card product-card">
-            <div
-              class="card-header align-content-center d-flex justify-content-between"
-            >
-              <div class="bi-upc">4601234500002</div>
-            </div>
-            <div class="card-body d-flex gap-2">
-              <span class="flex-grow-1">Тостер</span>
-              <span>1&nbsp;835,93 </span>
-            </div>
-          </div>
-        </div>
-
-        <div class="col">
-          <div class="card">
-            <div
-              class="card-header align-content-center d-flex justify-content-between"
-            >
-              <div class="bi-upc">4601234500000</div>
-            </div>
-            <div class="card-body d-flex gap-2">
-              <span class="flex-grow-1">Название</span>
-              <span>9&nbsp;999,99</span>
-            </div>
-          </div>
-        </div>
-        <div class="col">
-          <div class="card">
-            <div
-              class="card-header align-content-center d-flex justify-content-between"
-            >
-              <div class="bi-upc">4601234500000</div>
-            </div>
-            <div class="card-body d-flex gap-2">
-              <span class="flex-grow-1">Название</span>
-              <span>9&nbsp;999,99</span>
-            </div>
-          </div>
-        </div>
-        <div class="col">
-          <div class="card">
-            <div
-              class="card-header align-content-center d-flex justify-content-between"
-            >
-              <div class="bi-upc">4601234500000</div>
-            </div>
-            <div class="card-body d-flex gap-2">
-              <span class="flex-grow-1">Название</span>
-              <span>9&nbsp;999,99</span>
-            </div>
-          </div>
-        </div>
+        </div-->
       </div>
 
-      <nav aria-label="products-navigation">
-        <ul class="pagination justify-content-end">
-          <li class="page-item">
+      <nav>
+        <ul class="pagination justify-content-end" id="catalog-pagination">
+          <!--li class="page-item">
             <a class="page-link" href="#?page=0">&laquo;</a>
           </li>
           <li class="page-item active">
@@ -163,7 +133,7 @@
           <li class="page-item"><a class="page-link" href="?page=2">3</a></li>
           <li class="page-item">
             <a class="page-link" href="?page=5">&raquo;</a>
-          </li>
+          </li--->
         </ul>
       </nav>
     </main>

@@ -1,0 +1,143 @@
+//export
+const mockCatalog = {
+  items: [
+    {
+      barcode: "4601234500001",
+      title: "Чайник электрический ",
+      status: "OPEN",
+      price: 2511.64,
+    },
+    {
+      barcode: "4601234500002",
+      title: "Тостер ",
+      status: "OPEN",
+      price: 1835.93,
+    },
+    {
+      barcode: "4601234500004",
+      title: "Блендер ",
+      status: "OPEN",
+      price: 3504.5,
+    },
+    {
+      barcode: "4601234500005",
+      title: "Мясорубка ",
+      status: "OPEN",
+      price: 3180.24,
+    },
+    {
+      barcode: "4601234500006",
+      title: "Кофеварка ",
+      status: "OPEN",
+      price: 2299.84,
+    },
+    {
+      barcode: "4601234500007",
+      title: "Утюг ",
+      status: "OPEN",
+      price: 2359.22,
+    },
+    {
+      barcode: "4601234500008",
+      title: "Фен ",
+      status: "OPEN",
+      price: 1424.93,
+    },
+    {
+      barcode: "4601234500009",
+      title: "Пылесос ",
+      status: "OPEN",
+      price: 6637.32,
+    },
+    {
+      barcode: "4601234500011",
+      title: "Холодильник ",
+      status: "OPEN",
+      price: 23653.84,
+    },
+    {
+      barcode: "4601234500012",
+      title: "Телевизор ",
+      status: "OPEN",
+      price: 27212.65,
+    },
+    {
+      barcode: "4601234500014",
+      title: "Планшет ",
+      status: "OPEN",
+      price: 9874.66,
+    },
+    {
+      barcode: "4601234500015",
+      title: "Смартфон ",
+      status: "OPEN",
+      price: 8048.47,
+    },
+    {
+      barcode: "4601234500016",
+      title: "Фотоаппарат ",
+      status: "OPEN",
+      price: 20536.69,
+    },
+    {
+      barcode: "4601234500017",
+      title: "Видеокамера ",
+      status: "OPEN",
+      price: 36385.95,
+    },
+    {
+      barcode: "4601234500020",
+      title: "Самокат ",
+      status: "OPEN",
+      price: 5063.9,
+    },
+    {
+      barcode: "4601234500021",
+      title: "Гироскутер ",
+      status: "OPEN",
+      price: 10776.39,
+    },
+    {
+      barcode: "4601234500022",
+      title: "Электросамокат ",
+      status: "OPEN",
+      price: 28126.56,
+    },
+    {
+      barcode: "4601234500023",
+      title: "Лыжи ",
+      status: "OPEN",
+      price: 7434.45,
+    },
+    {
+      barcode: "4601234500025",
+      title: "Скейтборд ",
+      status: "OPEN",
+      price: 4078.81,
+    },
+    {
+      barcode: "4601234500026",
+      title: "Санки ",
+      status: "OPEN",
+      price: 3546.06,
+    },
+    {
+      barcode: "4601234500027",
+      title: "Качели детские ",
+      status: "OPEN",
+      price: 9215.76,
+    },
+    {
+      barcode: "4601234500028",
+      title: "Горка детская ",
+      status: "OPEN",
+      price: 10044.23,
+    },
+    {
+      barcode: "4601234500030",
+      title: "Бассейн надувной ",
+      status: "OPEN",
+      price: 3062.81,
+    },
+  ],
+};
