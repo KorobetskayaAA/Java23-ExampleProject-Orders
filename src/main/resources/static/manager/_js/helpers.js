@@ -43,21 +43,6 @@ function sorted(arr, sorting) {
 }
 
 //export
-function setLoading(spinner, isLoading) {
-  spinner.hidden = !isLoading;
-}
-
-//export
-function setAlert(alert, message) {
-  if (!message) {
-    alert.hidden = true;
-    return;
-  }
-  alert.innerText = message;
-  alert.hiddent = false;
-}
-
-//export
 function generateRange(count) {
   return Array.from(Array(count).keys());
 }

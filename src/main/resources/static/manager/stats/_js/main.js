@@ -65,11 +65,11 @@ document.addEventListener("DOMContentLoaded", () => {
   function getTotals(stats) {
     let totals = stats.reduce(
       (s, sum) => ({
-        totalAmount: sum.totalAmount + (s.totalAmount || 0),
-        totalQuantity: sum.totalQuantity + (s.totalQuantity || 0),
-        totalItemsCount: sum.totalItemsCount + (s.totalItemsCount || 0),
-        cancelAmount: sum.cancelAmount + (s.cancelAmount || 0),
-        cancelQuantity: sum.cancelQuantity + (s.cancelQuantity || 0),
+        totalAmount: sum.totalAmount + (+s.totalAmount || 0),
+        totalQuantity: sum.totalQuantity + (+s.totalQuantity || 0),
+        totalItemsCount: sum.totalItemsCount + (+s.totalItemsCount || 0),
+        cancelAmount: sum.cancelAmount + (+s.cancelAmount || 0),
+        cancelQuantity: sum.cancelQuantity + (+s.cancelQuantity || 0),
       }),
       {
         totalAmount: 0,
@@ -79,7 +79,6 @@ document.addEventListener("DOMContentLoaded", () => {
         cancelQuantity: 0,
       }
     );
-    console.log(stats, totals);
     return totals;
   }
 });

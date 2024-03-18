@@ -94,6 +94,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function setPagesCount(count) {
+    pagination.replaceChildren();
     pagination.append(createPaginationLi(0, "&laquo;"));
     generateRange(count).forEach((p) => {
       pagination.append(createPaginationLi(p, p + 1, p == currentPage));

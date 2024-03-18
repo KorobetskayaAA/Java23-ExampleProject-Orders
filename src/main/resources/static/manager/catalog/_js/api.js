@@ -16,7 +16,7 @@ const api = {
     return items.slice(page * pageSize, (page + 1) * pageSize);
   },
 
-  getPagesCount(pageSize) {
+  getPagesCount(pageSize, filterBy) {
     return new Promise((resolve) =>
       setTimeout(
         () => resolve(Math.ceil(mockCatalog.items.length / pageSize)),

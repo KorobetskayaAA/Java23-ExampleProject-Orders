@@ -25,9 +25,9 @@
 
     <script src="../_js/helpers.js"></script>
     <script src="../_js/components.js"></script>
-    <script src="./_js/mock.js"></script>
-    <script src="./_js/api.js"></script>
-    <script src="./_js/main.js"></script>
+      <script src="_js/mock.js"></script>
+      <script src="_js/api.js"></script>
+      <script src="_js/main.js"></script>
   </head>
   <body>
     <header class="bg-dark p-3">
@@ -42,12 +42,12 @@
       <nav>
         <ul class="nav nav-pills d-flex flex-lg-column flex-row">
           <li class="nav-item">
-            <a class="nav-link" href="../catalog/index.html"
+            <a class="nav-link active" href="#"
               ><i class="bi bi-folder-fill m-1"></i>Каталог</a
             >
           </li>
           <li class="nav-item">
-            <a class="nav-link active" href="#"
+            <a class="nav-link" href="../activeorders/index.html"
               ><i class="bi bi-cart-fill m-1"></i>Активные заказы</a
             >
           </li>
@@ -60,10 +60,33 @@
       </nav>
     </aside>
 
-    <main class="container-fluid">
-      <div class="row my-3">
-        <div class="col">
-          <h2>Активные заказы</h2>
+    <main class="container-fluid my-3">
+      <div class="row">
+        <div class="col my-2">
+          <h2>Каталог</h2>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col my-2">
+          <label for="exampleFormControlInput1" class="form-label">Поиск</label>
+          <input
+            type="text"
+            class="form-control"
+            id="input-search"
+            placeholder="Введите штрих-код или часть названия"
+          />
+        </div>
+      </div>
+      <div class="row">
+        <div class="col my-2 d-flex gap-3">
+          <label>Сортировка:</label>
+          <a href="#" class="link-body-emphasis" sortBy="title"
+            >Название<i class="bi m-1"></i
+          ></a>
+
+          <a href="#" class="link-body-emphasis" sortBy="price"
+            >Цена<i class="bi m-1"></i
+          ></a>
         </div>
       </div>
       <div class="row my-3">
@@ -78,54 +101,41 @@
           <div class="alert alert-danger" id="alert" hidden></div>
         </div>
       </div>
-      <div class="row my-3">
-        <div class="col">
-          <table id="table-active_order_items" class="table table-hover" hidden>
-            <thead class="table-primary">
-              <tr>
-                <th scope="col">Штрих-код</th>
-                <th scope="col">
-                  <a href="#" class="link-body-emphasis" sortby="title"
-                    >Название <i class="bi ml-1"></i
-                  ></a>
-                </th>
-                <th scope="col">
-                  <a
-                    href="#"
-                    class="sort-option link-body-emphasis"
-                    sortby="price"
-                    >Цена <i class="bi ml-1"></i
-                  ></a>
-                </th>
-                <th scope="col">
-                  <a
-                    href="#"
-                    class="sort-option link-body-emphasis"
-                    sortby="quantity"
-                    >Заказано, шт. <i class="bi ml-1"></i
-                  ></a>
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              <!--tr>
-                <td>4601234500002</td>
-                <td>Тостер</td>
-                <td class="td-number">1&nbsp;835,93</td>
-                <td class="td-number">1</td>
-              </tr-->
-            </tbody>
-          </table>
-        </div>
-      </div>
-      <div class="row my-3">
-        <div class="col">
-          <div id="total" class="alert alert-info text-end">
-            Общая сумма:
-            <strong id="total_value"></strong>
+      <div
+        class="my-3 row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3"
+        id="catalog-container"
+      >
+        <!--div class="col">
+          <div class="card product-card">
+            <div
+              class="card-header align-content-center d-flex justify-content-between"
+            >
+              <div class="bi-upc">4601234500001</div>
+            </div>
+            <div class="card-body d-flex gap-2">
+              <span class="flex-grow-1">Чайник электрический</span>
+              <span>2&nbsp;511,64</span>
+            </div>
           </div>
         </div>
+        </div-->
       </div>
+
+      <nav>
+        <ul class="pagination justify-content-end" id="catalog-pagination">
+          <!--li class="page-item">
+            <a class="page-link" href="#?page=0">&laquo;</a>
+          </li>
+          <li class="page-item active">
+            <a class="page-link" href="?page=0">1</a>
+          </li>
+          <li class="page-item"><a class="page-link" href="?page=1">2</a></li>
+          <li class="page-item"><a class="page-link" href="?page=2">3</a></li>
+          <li class="page-item">
+            <a class="page-link" href="?page=5">&raquo;</a>
+          </li--->
+        </ul>
+      </nav>
     </main>
 
     <footer class="footer mt-auto py-1 bg-light">
