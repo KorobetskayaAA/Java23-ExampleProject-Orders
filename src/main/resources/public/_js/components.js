@@ -1,18 +1,16 @@
-//import { autoFormat } from "./helpers.js";
+import { autoFormat } from "./helpers.js";
 
-//export
-function setRows(table, rows) {
+export function setRows(table, rows) {
   const tableBody = table.querySelector("tbody");
   tableBody.replaceChildren();
-  for (row of rows) {
+  for (let row of rows) {
     tableBody.append(createRow(row));
   }
 }
 
 function createRow(row) {
-  console.log("createRow", row);
   const tr = document.createElement("tr");
-  for (field in row) {
+  for (let field in row) {
     tr.append(createCell(field, row[field]));
   }
   return tr;
@@ -31,13 +29,11 @@ function createCell(field, value) {
   return td;
 }
 
-//export
-function setLoading(spinner, isLoading) {
+export function setLoading(spinner, isLoading) {
   spinner.hidden = !isLoading;
 }
 
-//export
-function setAlert(alert, message) {
+export function setAlert(alert, message) {
   if (!message) {
     alert.hidden = true;
     return;
@@ -46,8 +42,7 @@ function setAlert(alert, message) {
   alert.hiddent = false;
 }
 
-//export
-function showSortBy(sortOptions, sorting) {
+export function showSortBy(sortOptions, sorting) {
   sortOptions.forEach((s) => {
     const si = s.querySelector(".bi");
     si.classList.remove("bi-sort-down-alt");

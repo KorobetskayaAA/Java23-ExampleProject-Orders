@@ -1,4 +1,6 @@
-//import api from "./api.js";
+import { api } from "./api.js";
+import { setLoading, setAlert, setRows } from "../../_js/components.js";
+import { autoFormat } from "../../_js/helpers.js";
 
 document.addEventListener("DOMContentLoaded", () => {
   const table = document.getElementById("table-stats");
@@ -29,7 +31,7 @@ document.addEventListener("DOMContentLoaded", () => {
             totalQuantity: s.totalQuantity,
             totalItemsCount: s.totalItemsCount,
             cancelAmount: s.cancelAmount,
-            cancelQuantity: s.cancelQuantity,
+            cancelCount: s.cancelCount,
           }))
         );
 
@@ -57,7 +59,7 @@ document.addEventListener("DOMContentLoaded", () => {
     );
     tableFooterTr.children[4].innerText = autoFormat(totals.cancelAmount);
     tableFooterTr.children[5].innerText = autoFormat(
-      totals.cancelQuantity,
+      totals.cancelCount,
       "integer"
     );
   }
@@ -69,14 +71,14 @@ document.addEventListener("DOMContentLoaded", () => {
         totalQuantity: sum.totalQuantity + (+s.totalQuantity || 0),
         totalItemsCount: sum.totalItemsCount + (+s.totalItemsCount || 0),
         cancelAmount: sum.cancelAmount + (+s.cancelAmount || 0),
-        cancelQuantity: sum.cancelQuantity + (+s.cancelQuantity || 0),
+        cancelCount: sum.cancelCount + (+s.cancelCount || 0),
       }),
       {
         totalAmount: 0,
         totalQuantity: 0,
         totalItemsCount: 0,
         cancelAmount: 0,
-        cancelQuantity: 0,
+        cancelCount: 0,
       }
     );
     return totals;

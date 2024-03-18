@@ -15,6 +15,14 @@ import ru.teamscore.java23.orders.model.statistics.OrdersStatistics;
 @SpringBootApplication
 public class OrdersApplication {
     public static void main(String[] args) {
+        // RestartClassLoader иногда вызывает конфликты классов при использовании java.util.stream
+        // из-за загрузки в два разных class loader. Пример ошибки:
+        // class ru.teamscore.java23.orders.model.statistics.OrdersStatistics cannot be cast
+        // to class ru.teamscore.java23.orders.model.statistics.OrdersStatistics
+        // (ru.teamscore.java23.orders.model.statistics.OrdersStatistics is in unnamed module of loader 'app';
+        // ru.teamscore.java23.orders.model.statistics.OrdersStatistics is in unnamed module of loader
+        // org.springframework.boot.devtools.restart.classloader.RestartClassLoader @61589606)
+        System.setProperty("spring.devtools.restart.enabled", "false");
         SpringApplication.run(OrdersApplication.class, args);
     }
 

@@ -12,7 +12,6 @@ import ru.teamscore.java23.orders.model.statistics.OrdersStatistics;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.Arrays;
 import java.util.HashSet;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -68,9 +67,9 @@ public class OrderInfoManagerTest {
     void getProcessingOrderItems() {
         var items = ordersManager.getInfo().getProcessingOrderItems();
         // all items are unique
-        var uniqueItems = new HashSet<Item>(items.length);
-        uniqueItems.addAll(Arrays.asList(items));
-        assertEquals(uniqueItems.size(), items.length);
+        var uniqueItems = new HashSet<OrderItem>(items.size());
+        uniqueItems.addAll(items);
+        assertEquals(uniqueItems.size(), items.size());
     }
 
     @Test
@@ -84,8 +83,8 @@ public class OrderInfoManagerTest {
                 );
         // Проверяем наличие результатов за каждый месяц.
         // Тестирование конкретных значений отдельно.
-        assertEquals(1, results.length);
-        var result = results[0];
+        assertEquals(1, results.size());
+        var result = results.get(0);
         assertEquals(year, result.getMonth().getYear());
         assertEquals(month, result.getMonth().getMonthValue());
         assertEquals(new BigDecimal("8703032.16"), result.getTotalAmount());

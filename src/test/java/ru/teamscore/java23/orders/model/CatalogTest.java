@@ -131,14 +131,14 @@ class CatalogTest {
     }
 
     @Test
-    void find() {
+    void getCount() {
         Catalog catalog = new Catalog(entityManager);
-        var result = catalog.find("qwert");
-        assertEquals(0, result.size());
-        result = catalog.find("46");
-        assertEquals(30, result.size());
-        result = catalog.find("4601234500007");
-        assertEquals(1, result.size());
+        var result = catalog.getCount("qwert");
+        assertEquals(0, result);
+        result = catalog.getCount("46");
+        assertEquals(30, result);
+        result = catalog.getCount("4601234500007");
+        assertEquals(1, result);
     }
 
     @Test
@@ -157,10 +157,10 @@ class CatalogTest {
     private void testSorted(Catalog catalog,
                             CatalogSortOption option, boolean desc, int page, int pageSize,
                             BiPredicate<Item, Item> compare) {
-        var result = catalog.getSorted(option, desc, page, pageSize);
-        assertEquals(pageSize, result.length);
-        for (int i = 1; i < result.length; i++) {
-            assertTrue(compare.test(result[i], result[i - 1]));
+        var result = catalog.getSorted(option, desc, null, page, pageSize);
+        assertEquals(pageSize, result.size());
+        for (int i = 1; i < result.size(); i++) {
+            assertTrue(compare.test(result.get(i), result.get(i - 1)));
         }
     }
 }

@@ -1,4 +1,6 @@
-//import api from "./api.js";
+import { setAlert, setLoading, showSortBy } from "../../_js/components.js";
+import { autoFormat, changeSorting, generateRange } from "../../_js/helpers.js";
+import { api } from "./api.js";
 
 document.addEventListener("DOMContentLoaded", () => {
   const catalogContainer = document.getElementById("catalog-container");
@@ -11,7 +13,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let filterBy;
   let sorting = {};
   let currentPage = 0;
-  let pageSize = 20;
+  let pageSize = 10;
 
   search.addEventListener("change", (evt) => {
     setFilter(evt.target.value);
@@ -33,10 +35,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     Promise.all([
       api.getCatalog(currentPage, pageSize, sorting, filterBy),
-      api.getPagesCount(pageSize),
+      api.getPagesCount(pageSize, filterBy),
     ])
       .then(([catalog, pagesCount]) => {
-        setCatalog(catalogContainer, catalog);
+        setCatalog(catalogContainer, catalog.items);
         setPagesCount(pagesCount);
       })
       .catch((err) => {
@@ -58,7 +60,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function setCatalog(catalogContainer, items) {
-    for (i of items) {
+    for (let i of items) {
       catalogContainer.append(createCard(i));
     }
 
@@ -95,6 +97,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function setPagesCount(count) {
     pagination.replaceChildren();
+    if (count <= 0) {
+      return;
+    }
     pagination.append(createPaginationLi(0, "&laquo;"));
     generateRange(count).forEach((p) => {
       pagination.append(createPaginationLi(p, p + 1, p == currentPage));

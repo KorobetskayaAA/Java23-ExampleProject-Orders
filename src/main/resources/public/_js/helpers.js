@@ -1,5 +1,7 @@
-//export
-function autoFormat(value, format) {
+export function autoFormat(value, format) {
+  if (value === undefined || value === null) {
+    return "";
+  }
   switch (format || typeof value) {
     case "string":
       return value;
@@ -30,8 +32,7 @@ function autoFormat(value, format) {
   }
 }
 
-//export
-function sorted(arr, sorting) {
+export function sorted(arr, sorting) {
   const arrCopy = [...arr];
   arrCopy.sort(
     (i1, i2) =>
@@ -42,13 +43,11 @@ function sorted(arr, sorting) {
   return arrCopy;
 }
 
-//export
-function generateRange(count) {
+export function generateRange(count) {
   return Array.from(Array(count).keys());
 }
 
-//export
-function changeSorting(sorting, field) {
+export function changeSorting(sorting, field) {
   if (field == sorting.field) {
     sorting.asc = !sorting.asc;
   } else {
@@ -56,4 +55,8 @@ function changeSorting(sorting, field) {
     sorting.asc = true;
   }
   return sorting;
+}
+
+export function getISODate(date) {
+  return date.toISOString().substring(0, 10);
 }

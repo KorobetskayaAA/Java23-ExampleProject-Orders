@@ -22,11 +22,11 @@ public class OrdersStatistics {
     @Column(name = "total_amount")
     private BigDecimal totalAmount;
     @Column(name = "total_quantity")
-    private int totalQuantity;
+    private long totalQuantity;
     @Column(name = "total_items_count")
-    private int totalItemsCount;
+    private long totalItemsCount;
     @Column(name = "cancel_amount")
     private BigDecimal cancelAmount;
     @Column(name = "cancel_quantity")
-    private int cancelCount;
+    private long cancelCount;
 }

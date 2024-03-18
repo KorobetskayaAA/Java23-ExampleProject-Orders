@@ -23,11 +23,7 @@
 
     <link href="../_css/style.css" rel="stylesheet" />
 
-    <script src="../_js/helpers.js"></script>
-    <script src="../_js/components.js"></script>
-      <script src="_js/mock.js"></script>
-      <script src="_js/api.js"></script>
-      <script src="_js/main.js"></script>
+      <script src="_js/main.js" type="module"></script>
   </head>
   <body>
     <header class="bg-dark p-3">
@@ -103,16 +99,25 @@
               </tr>
             </thead>
             <tbody class="table-group-divider">
-            <!--tr>
-              <td>2023</th>
-              <td>дек</td>
-              <td class="td-number">999&nbsp;999,99</td>
-              <td class="td-number">99</td>
-              <td class="td-number">9</td>
-              <td class="td-number">9&nbsp;999,99</td>
-              <td class="td-number">19</td>
-            </tr-->
-            </tfoot>
+            <tr>
+                <td>2023</th>
+                <td>дек</td>
+                <td class="td-number">999&nbsp;999,99</td>
+                <td class="td-number">99</td>
+                <td class="td-number">9</td>
+                <td class="td-number">9&nbsp;999,99</td>
+                <td class="td-number">19</td>
+            </tr>
+            </tbody>
+              <tfoot class="table-light table-group-divider">
+              <tr>
+                  <th colspan="2" scope="row">Всего</th>
+                  <td class="td-number">99&nbsp;999&nbsp;234,12</td>
+                  <td class="td-number">200</td>
+                  <td class="td-number">120</td>
+                  <td class="td-number">100&nbsp;000,00</td>
+                  <td class="td-number">50</td>
+              </tr>
           </table>
         </div>
       </div>

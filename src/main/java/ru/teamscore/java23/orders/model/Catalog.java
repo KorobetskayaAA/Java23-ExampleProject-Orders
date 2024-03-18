@@ -5,13 +5,15 @@ import jakarta.persistence.NoResultException;
 import jakarta.persistence.criteria.Root;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 import ru.teamscore.java23.orders.model.entities.Barcode;
 import ru.teamscore.java23.orders.model.entities.Item;
 import ru.teamscore.java23.orders.model.enums.CatalogSortOption;
 
-import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
+@Service
 @RequiredArgsConstructor
 public class Catalog {
     private final EntityManager entityManager;
@@ -60,30 +62,40 @@ public class Catalog {
         entityManager.getTransaction().commit();
     }
 
-    public Collection<Item> find(String search) {
+    public long getCount(String search) {
         String pattern = "%" + search + "%";
         return entityManager
-                .createQuery("from Item where title ilike :pattern or " +
+                .createQuery("select count(*) from Item " +
+                                "where title ilike :pattern or " +
                                 "cast(barcode as String) ilike :pattern",
-                        Item.class)
+                        Long.class)
                 .setParameter("pattern", pattern)
-                .getResultList();
+                .getSingleResult();
     }
 
-    public Item[] getSorted(CatalogSortOption option, boolean desc, int page, int pageSize) {
-        var query = entityManager.getCriteriaBuilder()
-                .createQuery(Item.class);
+    public List<Item> getSorted(CatalogSortOption option, boolean desc, String search, int page, int pageSize) {
+        var cb = entityManager.getCriteriaBuilder();
+        var query = cb.createQuery(Item.class);
         Root<Item> root = query.from(Item.class);
-        var sortBy = root.get(option.getColumnName());
-        var order = desc
-                ? entityManager.getCriteriaBuilder().desc(sortBy)
-                : entityManager.getCriteriaBuilder().asc(sortBy);
-        query.orderBy(order);
+
+        if (search != null && !search.equals("")) {
+            var searchBarcode = cb.equal(root.get("barcode"), search);
+            var searchTitle = cb.like(root.get("title"), "%" + search + "%");
+            query.where(cb.or(searchBarcode, searchTitle));
+        }
+
+        if (option != null) {
+            var sortBy = root.get(option.getColumnName());
+            var order = desc
+                    ? cb.desc(sortBy)
+                    : cb.asc(sortBy);
+            query.orderBy(order);
+        }
+
         return entityManager
                 .createQuery(query)
                 .setFirstResult(page * pageSize)
                 .setMaxResults(pageSize)
-                .getResultList()
-                .toArray(Item[]::new);
+                .getResultList();
     }
 }
