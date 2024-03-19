@@ -4,37 +4,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Orders - Админпанель - Заказы</title>
-  </head>
-  <body class="d-flex flex-column h-100">
+</head>
+<body class="d-flex flex-column h-100">
   <header th:replace="~{../fragments/layout :: header('Java23. Orders - Заказы')}"></header>
-
-    <nav class="navbar navbar-expand-sm navbar-dark bg-secondary">
-      <div class="container-lg">
-        <button
-          class="navbar-toggler"
-          type="button"
-          data-bs-toggle="collapse"
-          data-bs-target="#navbarNav"
-          aria-controls="navbarNav"
-          aria-expanded="false"
-          aria-label="Toggle navigation"
-        >
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-          <ul class="navbar-nav">
-            <li class="nav-item">
-                <a class="nav-link" href="../items/index.html" th:href="@{/adminpanel/items}"
-                >Товары</a
-              >
-            </li>
-            <li class="nav-item">
-              <a class="nav-link active" href="#">Заказы</a>
-            </li>
-          </ul>
-        </div>
-      </div>
-    </nav>
+  <nav th:replace="~{../fragments/navigation :: main_menu('orders')}"></nav>
 
     <main class="flex-shrink-0">
       <div class="container-lg">
@@ -69,11 +42,11 @@
                     <div class="d-flex justify-content-evenly"
                          th:if="${order.order.status.isEditable()}">
                         <a class="nav-item text-primary" title="Закрыть"
-                           th:href="@{'orders/close/' + ${order.id}}"
+                           th:href="@{|orders/close/${order.id}?page=${currentPage}|}"
                         ><i class="bi bi-bookmark-check-fill"></i
                     ></a>
                         <a class="nav-item text-danger" title="Отменить"
-                           th:href="@{'orders/cancel/' + ${order.id}}"
+                           th:href="@{|orders/cancel/${order.id}?page=${currentPage}|}"
                         ><i class="bi bi-bookmark-x-fill"></i
                     ></a>
                   </div>
@@ -83,22 +56,7 @@
           </table>
         </div>
           <div class="m-2">
-              <nav aria-label="products-navigation" th:if="${pagesCount} > 0">
-                  <ul class="pagination justify-content-end">
-                      <li class="page-item">
-                          <button class="page-link" onclick="setParam('page', 0)">&laquo;</button>
-                      </li>
-                      <li th:each="page: ${#numbers.sequence(1, pagesCount)}" class="page-item active"
-                          th:class="${page} == ${currentPage} ? 'active' : ''">
-                          <button class="page-link" th:onclick="'setParam(`page`,' +${page}+ ')'" th:text="${page}">1
-                          </button>
-                      </li>
-                      <li class="page-item">
-                          <button class="page-link" onclick="setParam('page', 5)"
-                                  th:onclick="setParam('page', ${pagesCount})">&laquo;
-                          </button>
-                      </li>
-                  </ul>
+              <nav th:replace="~{../fragments/navigation :: pagination}">
               </nav>
           </div>
       </div>

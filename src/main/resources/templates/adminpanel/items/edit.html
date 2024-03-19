@@ -4,25 +4,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Orders - Админпанель - Каталог</title>
-  </head>
-  <body class="d-flex flex-column h-100">
+</head>
+<body class="d-flex flex-column h-100">
   <header th:replace="~{../fragments/layout :: header('Java23. Orders - Каталог')}"></header>
-
-    <nav class="navbar navbar-expand-sm navbar-dark bg-secondary">
-      <div class="container-lg">
-        <div class="navbar-brand">Создание товара</div>
-        <div class="collapse navbar-collapse" id="navbarNav">
-          <ul class="navbar-nav">
-            <li class="nav-item">
-                <a class="nav-link active" href="../items/index.html" th:href="@{/adminpanel/items}">Товары</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="../orders/index.html" th:href="@{/adminpanel/orders}">Заказы</a>
-            </li>
-          </ul>
-        </div>
-      </div>
-    </nav>
+  <nav th:replace="~{../fragments/navigation :: main_menu('items')}"></nav>
 
     <main class="flex-shrink-0">
       <div class="container-lg">

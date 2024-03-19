@@ -2,10 +2,7 @@ package ru.teamscore.java23.orders.controllers;
 
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
-import org.modelmapper.AbstractConverter;
-import org.modelmapper.Converter;
 import org.modelmapper.ModelMapper;
-import org.modelmapper.config.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -15,7 +12,6 @@ import ru.teamscore.java23.orders.controllers.dto.CatalogItemDto;
 import ru.teamscore.java23.orders.model.Catalog;
 import ru.teamscore.java23.orders.model.entities.Item;
 import ru.teamscore.java23.orders.model.enums.CatalogSortOption;
-import ru.teamscore.java23.orders.model.enums.ItemStatus;
 
 @Controller
 @RequestMapping("/adminpanel/items")
@@ -63,36 +59,36 @@ public class ItemsController {
 
     @GetMapping("create")
     public String getCreateForm(Model model) {
-        model.addAttribute("item", new Item());
+        model.addAttribute("item", new CatalogItemDto());
         return "/adminpanel/items/edit";
     }
 
     @GetMapping("edit")
     public String getCreateForm(@RequestParam String barcode, Model model) {
         var item = catalog.getItem(barcode);
-        model.addAttribute("item", item.get());
+        model.addAttribute("item", mapCatalogItem(item.get()));
         return "/adminpanel/items/edit";
     }
 
     @PostMapping("create")
-    public String postCreate(@ModelAttribute("item") @Valid Item item,
+    public String postCreate(@ModelAttribute("item") @Valid CatalogItemDto item,
                              BindingResult bindingResult
     ) {
         if (bindingResult.hasErrors()) {
             return "/adminpanel/items/edit";
         }
-        catalog.addItem(item);
+        catalog.addItem(mapCatalogItem(item));
         return "redirect:/adminpanel/items";
     }
 
     @PostMapping("edit")
-    public String postEdit(@ModelAttribute("item") @Valid Item item,
+    public String postEdit(@ModelAttribute("item") @Valid CatalogItemDto item,
                            BindingResult bindingResult
     ) {
         if (bindingResult.hasErrors()) {
             return "/adminpanel/items/edit";
         }
-        catalog.updateItem(item);
+        catalog.updateItem(mapCatalogItem(item));
         return "redirect:/adminpanel/items";
     }
 
@@ -102,16 +98,6 @@ public class ItemsController {
     }
 
     private Item mapCatalogItem(CatalogItemDto item) {
-        Converter<String, ItemStatus> itemStatusConverter = new AbstractConverter<String, ItemStatus>() {
-            protected ItemStatus convert(String source) {
-                return source == null ? null : ItemStatus.valueOf(source);
-            }
-        };
-
-        modelMapper.getConfiguration()
-                .setFieldMatchingEnabled(true)
-                .setFieldAccessLevel(Configuration.AccessLevel.PRIVATE);
-        modelMapper.addConverter(itemStatusConverter);
         modelMapper.typeMap(CatalogItemDto.class, Item.class);
         var result = modelMapper.map(item, Item.class);
         return result;

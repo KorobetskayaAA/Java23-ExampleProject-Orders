@@ -9,6 +9,7 @@ import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import ru.teamscore.java23.orders.controllers.dto.OrderCreateDto;
 import ru.teamscore.java23.orders.model.Catalog;
@@ -103,7 +104,11 @@ public class OrdersController {
     }
 
     @GetMapping("{action}/{id}")
-    public String closeOrder(@PathVariable String action, @PathVariable long id, RedirectAttributes redirectAttrs) {
+    public ModelAndView closeOrder(@PathVariable String action,
+                                   @PathVariable long id,
+                                   @RequestParam(required = false) int page,
+                                   RedirectAttributes redirectAttrs,
+                                   Model model) {
         var order = ordersManager.getOrder(id);
         if (order.isPresent()) {
             try {
@@ -117,10 +122,13 @@ public class OrdersController {
                 }
                 ordersManager.updateOrder(order.get());
             } catch (OrderSetStatusException ex) {
+                // будет добавлено как объект Model
                 redirectAttrs.addFlashAttribute("alert", ex.getMessage());
             }
         }
-        return "redirect:/adminpanel/orders";
+        // будет добавлено как параметр запроса ?page={page}
+        model.addAttribute("page", page);
+        return new ModelAndView("redirect:/adminpanel/orders", model.asMap());
     }
 
     private OrderWithItems mapCreateOrder(OrderCreateDto orderFromForm) {

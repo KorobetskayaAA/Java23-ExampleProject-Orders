@@ -3,13 +3,18 @@ package ru.teamscore.java23.orders;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import org.hibernate.cfg.Configuration;
+import org.modelmapper.AbstractConverter;
+import org.modelmapper.Converter;
 import org.modelmapper.ModelMapper;
+import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import ru.teamscore.java23.orders.model.entities.Barcode;
 import ru.teamscore.java23.orders.model.entities.Item;
 import ru.teamscore.java23.orders.model.entities.OrderItem;
 import ru.teamscore.java23.orders.model.entities.OrderWithItems;
+import ru.teamscore.java23.orders.model.enums.ItemStatus;
 import ru.teamscore.java23.orders.model.statistics.OrdersStatistics;
 
 @SpringBootApplication
@@ -44,6 +49,26 @@ public class OrdersApplication {
 
     @Bean
     public ModelMapper modelMapper() {
-        return new ModelMapper();
+        var modelMapper = new ModelMapper();
+        Converter<String, ItemStatus> itemStatusConverter = new AbstractConverter<>() {
+            protected ItemStatus convert(String source) {
+                return source == null ? null : ItemStatus.valueOf(source);
+            }
+        };
+        Converter<String, Barcode> barcodeConverter = new AbstractConverter<>() {
+            protected Barcode convert(String source) {
+                return source == null ? null : new Barcode(source);
+            }
+        };
+
+        modelMapper.getConfiguration()
+                .setFieldMatchingEnabled(true)
+                .setFieldAccessLevel(org.modelmapper.config.Configuration.AccessLevel.PRIVATE)
+                // LOOSE - мягкое связывание для вложенной сущности Item
+                // (проверяет совпадение по имени поля)
+                // При этом price есть и в OrderItem, и в Item - будет взят из "верхней" сущности OrderItem        modelMapper.addConverter(itemStatusConverter);
+                .setMatchingStrategy(MatchingStrategies.LOOSE);
+        modelMapper.addConverter(barcodeConverter);
+        return modelMapper;
     }
 }

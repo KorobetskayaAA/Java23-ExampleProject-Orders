@@ -4,41 +4,11 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Orders - Админпанель - Заказы</title>
-  </head>
-  <body class="d-flex flex-column h-100">
+</head>
+<body class="d-flex flex-column h-100">
   <header th:replace="~{../fragments/layout :: header('Java23. Orders - Заказы')}"></header>
+  <nav th:replace="~{../fragments/navigation :: main_menu('orders')}"></nav>
 
-    <nav class="navbar navbar-expand-sm navbar-dark bg-secondary">
-      <div class="container-lg">
-        <div class="navbar-brand">Создание заказа</div>
-        <button
-          class="navbar-toggler"
-          type="button"
-          data-bs-toggle="collapse"
-          data-bs-target="#navbarNav"
-          aria-controls="navbarNav"
-          aria-expanded="false"
-          aria-label="Toggle navigation"
-        >
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-          <ul class="navbar-nav">
-            <li class="nav-item">
-              <a
-                class="nav-link active"
-                aria-current="page"
-                href="../items/index.html"
-                >Товары</a
-              >
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="index.html">Заказы</a>
-            </li>
-          </ul>
-        </div>
-      </div>
-    </nav>
 
     <main class="flex-shrink-0">
       <div class="container-lg">
@@ -50,8 +20,8 @@
                   </div>
               </div>
           <div class="row align-items-end my-3">
-            <div class="col-2">
-                <label for="input-add_barcode" class="form-label">Штрих-код</label>
+              <div class="col">
+                  <label for="input-add_barcode" class="form-label">Штрих-код</label>
               <input
                 type="text"
                 class="form-control"
@@ -65,24 +35,6 @@
                 <div class="invalid-feedback" th:if="${#fields.hasErrors('newItem.barcode')}"
                      th:errors="*{newItem.barcode}"></div>
             </div>
-            <div class="col-4">
-                <label for="input-add_name" class="form-label">Название</label>
-              <input
-                type="text"
-                class="form-control"
-                id="input-add_name"
-                disabled
-              />
-            </div>
-            <div class="col">
-                <label for="input-add_price" class="form-label">Цена</label>
-              <input
-                type="text"
-                class="form-control"
-                id="input-add_price"
-                disabled
-              />
-            </div>
             <div class="col">
                 <label for="input-add_quantity" class="form-label">Количество</label>
               <input
@@ -94,15 +46,6 @@
                 min="0"
                 step="1"
                 th:field="*{newItem.quantity}"
-              />
-            </div>
-            <div class="col">
-                <label for="input-add_amount" class="form-label">Стоимость</label>
-              <input
-                type="text"
-                class="form-control"
-                id="input-add_amount"
-                disabled
               />
             </div>
             <div class="col-auto">
@@ -132,13 +75,15 @@
                               </td>
                               <td th:text="${item.item.title}">Холодильник
                               </td>
-                              <td th:text="${item.item.price}" class="text-end">23653,84</td>
+                              <td th:text="${#numbers.formatCurrency(item.item.price)}" class="text-end">23653,84</td>
                               <td th:text="${item.quantity}" class="text-end">
                                   <span th:text="${item.quantity}">1</span>
                                   <input type="hidden" th:field="*{items[__${rowStat.index}__].quantity}"/></td>
-                              <td th:text="${item.item.price}*${item.quantity}" class="text-end">23653,84</td>
+                              <td th:text="${#numbers.formatCurrency(item.item.price*item.quantity)}" class="text-end">
+                                  23653,84
+                              </td>
                               <td class="text-center">
-                                  <button class="btn btn-outline-danger btn-sm nav-link text-danger" type="submit"
+                                  <button class="btn btn-outline-danger btn-sm" type="submit"
                                           name="removeItemSubmit" th:value="${item.barcode}"
                                   ><i class="bi bi-trash-fill"></i
                                   ></button>
@@ -148,7 +93,9 @@
                           <tfoot class="fw-bold table-secondary">
                           <tr>
                               <td colspan="4">ИТОГО</td>
-                              <td th:text="${order.getTotalAmount()}" class="text-end">78079,14</td>
+                              <td th:text="${#numbers.formatCurrency(order.getTotalAmount())}" class="text-end">
+                                  78079,14
+                              </td>
                               <td></td>
                           </tr>
                           </tfoot>

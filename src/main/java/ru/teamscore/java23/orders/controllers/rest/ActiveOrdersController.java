@@ -2,7 +2,6 @@ package ru.teamscore.java23.orders.controllers.rest;
 
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
-import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -34,11 +33,6 @@ public class ActiveOrdersController {
     }
 
     private ActiveOrderItemDto convertDtoOrderItems(OrderItem item) {
-        // LOOSE - мягкое связывание для вложенной сущности Item
-        // (проверяет совпадение по имени поля)
-        // При этом price есть и в OrderItem, и в Item - будет взят из "верхней" сущности OrderItem
-        modelMapper.getConfiguration()
-                .setMatchingStrategy(MatchingStrategies.LOOSE);
         modelMapper.typeMap(OrderItem.class, ActiveOrderItemDto.class);
         return modelMapper.map(item, ActiveOrderItemDto.class);
     }
