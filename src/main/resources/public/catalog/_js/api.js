@@ -12,7 +12,7 @@ export const api = {
       params.append("sortingField", sorting.field);
     }
     if (!sorting.asc) {
-      params.append("sortingDesc");
+      params.append("sortingDesc", true);
     }
     return basicApi.get("catalog", params);
   },

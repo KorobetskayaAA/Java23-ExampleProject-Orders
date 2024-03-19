@@ -29,13 +29,14 @@ public class StatsController {
                 .getInfo()
                 .getStatistics(from, to)
                 .stream()
-                .map(s -> new OrdersStatisticsDto(s))
-                //.map(s -> convertDtoStats(s))
+                //.map(s -> new OrdersStatisticsDto(s))
+                .map(s -> convertDtoStats(s))
                 .toList();
     }
 
     private OrdersStatisticsDto convertDtoStats(OrdersStatistics stats) {
         modelMapper.typeMap(OrdersStatistics.class, OrdersStatisticsDto.class);
-        return modelMapper.map(stats, OrdersStatisticsDto.class);
+        OrdersStatisticsDto result = modelMapper.map(stats, OrdersStatisticsDto.class);
+        return result;
     }
 }

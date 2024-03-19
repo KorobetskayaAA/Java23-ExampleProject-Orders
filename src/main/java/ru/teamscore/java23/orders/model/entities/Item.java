@@ -18,6 +18,7 @@ import java.util.Objects;
 @NamedQuery(name = "itemByBarcode", query = "from Item i where i.barcode = :barcode")
 public class Item {
     @Getter
+    @Setter
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
@@ -34,6 +35,8 @@ public class Item {
     @Column(columnDefinition = "text")
     private String title;
 
+    @Getter
+    @Setter
     @Enumerated(EnumType.STRING)
     private ItemStatus status = ItemStatus.CLOSED;
 

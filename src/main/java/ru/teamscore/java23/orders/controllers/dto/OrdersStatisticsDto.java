@@ -1,12 +1,14 @@
 package ru.teamscore.java23.orders.controllers.dto;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import ru.teamscore.java23.orders.model.statistics.OrdersStatistics;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Data
+@NoArgsConstructor
 public class OrdersStatisticsDto {
     private LocalDate month;
     private BigDecimal totalAmount;

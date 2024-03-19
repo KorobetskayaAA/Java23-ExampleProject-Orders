@@ -6,6 +6,7 @@ import java.math.BigDecimal;
 
 @Data
 public class CatalogItemDto {
+    private long id;
     private String barcode;
     private String title;
     private String status;
