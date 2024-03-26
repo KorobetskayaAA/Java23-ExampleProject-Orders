@@ -1,0 +1,39 @@
+services:
+  server:
+    build:
+      context: .
+    ports:
+# порт хоста:порт в контейнере
+      - 8080:8080
+
+# зависимость от контейнера БД
+    depends_on:
+      db:
+        # проверяем, что БД доступна, см. ниже healthcheck
+        condition: service_healthy
+    # переменные среды, прописаны в конфиге Hibernate
+    environment:
+      - POSTGRES_URL=jdbc:postgresql://db/orders
+      - POSTGRES_USER=orders_user
+      - POSTGRES_PASSWORD=orders
+  # описываем образ БД
+  db:
+    image: postgres
+    restart: always
+    volumes:
+      - ./src/main/scripts/db:/docker-entrypoint-initdb.d
+      - db-orders-data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=orders
+      - POSTGRES_USER=orders_user
+      - POSTGRES_PASSWORD=orders
+    ports:
+      - 15432:5432
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-U", "orders_user", "-d", "orders"  ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+volumes:
+  db-orders-data:
+

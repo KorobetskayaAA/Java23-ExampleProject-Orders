@@ -33,8 +33,12 @@ public class OrdersApplication {
 
     @Bean
     public EntityManagerFactory entityManagerFactory() {
-        return new Configuration()
+        var conf = new Configuration()
                 .configure("hibernate.cfg.xml")
+                .setProperty("hibernate.connection.url", System.getenv("POSTGRES_URL"))
+                .setProperty("hibernate.connection.username", System.getenv("POSTGRES_USER"))
+                .setProperty("hibernate.connection.password", System.getenv("POSTGRES_PASSWORD"));
+        return conf
                 .addAnnotatedClass(Item.class)
                 .addAnnotatedClass(OrderWithItems.class)
                 .addAnnotatedClass(OrderItem.class)
